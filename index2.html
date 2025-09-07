@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QR para fechado productos OAK Latam</title>
+  <style>
+    body {
+      background-color: #2f006e;
+      font-family: 'Georgia', serif;
+      color: white;
+      text-align: center;
+      margin: 0;
+      padding-top: 20px;
+    }
+
+    .logo img {
+      width: 120px;
+      height: auto;
+    }
+
+    .banderas img {
+      width: 35px;
+      height: 35px;
+      margin: 0 6px;
+      border-radius: 50%;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin: 10px 0 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    label {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input {
+      padding: 10px;
+      width: 280px;
+      border: none;
+      border-radius: 5px;
+      background-color: #f5eee0;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #e63946;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .qr-container {
+      margin-top: 20px;
+      display: inline-block;
+      background: white;
+      padding: 4px;
+      border-radius: 6px;
+      position: relative;
+    }
+
+    .qr-label {
+      position: absolute;
+      top: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      font-weight: bold;
+      color: #000;
+      background: white;
+      padding: 0 3px;
+      border-radius: 3px;
+      line-height: 1;
+    }
+
+    #qr-code {
+      width: 38px;
+      height: 38px;
+      display: block;
+      margin-top: 14px;
+    }
+
+    #downloadLink {
+      display: none;
+      margin-top: 15px;
+      padding: 10px 20px;
+      background-color: #f5eee0;
+      color: #2f006e;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    #downloadLink:hover {
+      background-color: #e4dcc8;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="logo">
+    <img src="Logo_Primary_Macaw_Offwhite (2).png" alt="Logo OAK">
+  </div>
+
+  <div class="banderas">
+    <img src="cr.jpg" alt="Costa Rica">
+    <img src="pa.jpg" alt="Panamá">
+    <img src="gt.png" alt="Guatemala">
+    <img src="sv.jpg" alt="El Salvador">
+  </div>
+
+  <h1>QR para fechado productos OAK Latam</h1>
+
+  <form id="formulario">
+    <label for="producto">Producto:</label>
+    <input type="text" id="producto" placeholder="Ej: Açaí" required>
+
+    <label for="lote">Lote:</label>
+    <input type="text" id="lote" placeholder="Ej: L234-08" required>
+
+    <label for="fechaPrimaria">Fecha primaria:</label>
+    <input type="date" id="fechaPrimaria" required>
+
+    <label for="fechaAbierto">Fecha abierto:</label>
+    <input type="date" id="fechaAbierto" required>
+
+    <label for="fechaVencimientoAbierto">Fecha vencimiento abierto:</label>
+    <input type="date" id="fechaVencimientoAbierto" required>
+
+    <label for="responsable">Responsable:</label>
+    <input type="text" id="responsable" placeholder="Ej: Juan Pérez" required>
+
+    <button type="submit">Generar QR</button>
+  </form>
+
+  <div id="qrWrapper" style="margin-top: 30px;"></div>
+  <a id="downloadLink">Descargar QR</a>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script>
+    const form = document.getElementById('formulario');
+    const qrWrapper = document.getElementById('qrWrapper');
+    const downloadLink = document.getElementById('downloadLink');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const producto = document.getElementById('producto').value.trim();
+      const lote = document.getElementById('lote').value.trim();
+      const fechaPrimaria = document.getElementById('fechaPrimaria').value;
+      const fechaAbierto = document.getElementById('fechaAbierto').value;
+      const fechaVencimiento = document.getElementById('fechaVencimientoAbierto').value;
+      const responsable = document.getElementById('responsable').value.trim();
+
+      const textoQR =
+        `Producto: ${producto}\n` +
+        `Lote: ${lote}\n` +
+        `Fecha primaria: ${fechaPrimaria}\n` +
+        `Fecha abierto: ${fechaAbierto}\n` +
+        `Vence abierto: ${fechaVencimiento}\n` +
+        `Responsable: ${responsable}`;
+
+      qrWrapper.innerHTML = "";
+
+      const container = document.createElement('div');
+      container.className = "qr-container";
+
+      const label = document.createElement('div');
+      label.className = "qr-label";
+      label.textContent = producto;
+
+      const canvas = document.createElement('canvas');
+      canvas.id = "qr-code";
+
+      container.appendChild(label);
+      container.appendChild(canvas);
+      qrWrapper.appendChild(container);
+
+      QRCode.toCanvas(canvas, textoQR, {
+        errorCorrectionLevel: 'H',
+        width: 150,
+        margin: 1
+      }, function (error) {
+        if (error) {
+          console.error(error);
+        } else {
+          const finalCanvas = document.createElement('canvas');
+          const ctx = finalCanvas.getContext('2d');
+
+          const qrSize = canvas.width;
+          const padding = 10;
+          const textHeight = 30;
+
+          finalCanvas.width = qrSize + padding * 2;
+          finalCanvas.height = qrSize + textHeight + padding * 2;
+
+          ctx.fillStyle = "#FFFFFF";
+          ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+          ctx.fillStyle = "#000000";
+          ctx.font = "bold 16px Georgia";
+          ctx.textAlign = "center";
+          ctx.fillText(producto, finalCanvas.width / 2, padding + 18);
+
+          ctx.drawImage(canvas, padding, textHeight + padding);
+
+          // Convertir a blob y luego base64 para evitar errores por tamaño
+          finalCanvas.toBlob(blob => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const finalDataURL = reader.result;
+
+              downloadLink.style.display = "inline-block";
+              downloadLink.href = finalDataURL;
+              downloadLink.download = `QR_${producto}.png`;
+
+              google.script.run
+            .withSuccessHandler(() => alert("QR guardado en la Sheet."))
+            .guardarEnSheet({
+              producto, lote, fechaPrimaria, fechaAbierto, fechaVencimiento, responsable
+            }, finalDataURL);
+            };
+            reader.readAsDataURL(blob);
+          }, 'image/png', 0.9);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
