@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QR para fechado productos OAK Latam</title>
   <style>
     body {
@@ -13,35 +13,29 @@
       margin: 0;
       padding-top: 20px;
     }
-
     .logo img {
       width: 120px;
       height: auto;
     }
-
     .banderas img {
       width: 35px;
       height: 35px;
       margin: 0 6px;
       border-radius: 50%;
     }
-
-    h1 {
+    h2 {
       font-size: 22px;
       margin: 10px 0 20px;
     }
-
     form {
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-
     label {
       margin-top: 15px;
       font-weight: bold;
     }
-
     input {
       padding: 10px;
       width: 280px;
@@ -51,9 +45,8 @@
       font-weight: bold;
       text-align: center;
     }
-
-    button {
-      margin-top: 20px;
+    .btn {
+      margin: 10px 6px;
       padding: 10px 20px;
       background-color: #e63946;
       color: white;
@@ -62,143 +55,138 @@
       font-weight: bold;
       cursor: pointer;
     }
-
-    #infoBox {
-      display: none;
+    #etiquetas-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 38mm);
+      grid-template-rows: repeat(5, 25mm);
+      gap: 3mm 5mm;
+      padding: 2mm 4mm;
+      box-sizing: border-box;
+      margin: 30px auto;
+      width: fit-content;
+    }
+    .etiqueta {
+      border: 1px solid #000;
+      font-size: 7pt;
+      padding: 2mm;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      white-space: pre-line;
       background-color: white;
       color: black;
-      padding: 20px;
-      border-radius: 8px;
-      margin-top: 30px;
-      width: fit-content;
-      text-align: left;
-      margin-left: auto;
-      margin-right: auto;
-      font-size: 14px;
-      line-height: 1.4;
-      white-space: pre-line;
     }
-
-    #downloadLink, #printBtn {
-      display: none;
-      margin: 15px 10px;
-      padding: 10px 20px;
-      background-color: #f5eee0;
-      color: #2f006e;
-      border: none;
-      border-radius: 5px;
+    .linea {
+      display: flex;
+      gap: 4px;
+    }
+    .label {
       font-weight: bold;
-      text-decoration: none;
-      cursor: pointer;
+      flex-shrink: 0;
     }
-
-    #downloadLink:hover, #printBtn:hover {
-      background-color: #e4dcc8;
+    .campo {
+      flex-grow: 1;
+      border-bottom: 0.5px dotted #000;
+      min-width: 30px;
+    }
+    @media print {
+      body * { visibility: hidden; }
+      #printArea, #printArea * { visibility: visible; }
+      #printArea {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 210mm;
+        height: 297mm;
+      }
+      @page { size: A4; margin: 0; }
     }
   </style>
 </head>
 <body>
-
   <div class="logo">
     <img src="Logo_Primary_Macaw_Offwhite (2).png" alt="Logo OAK">
   </div>
-
   <div class="banderas">
     <img src="cr.jpg" alt="Costa Rica">
     <img src="pa.jpg" alt="Panamá">
     <img src="gt.png" alt="Guatemala">
     <img src="sv.jpg" alt="El Salvador">
   </div>
-
-  <h1>QR para fechado productos OAK Latam</h1>
+  <h2>QR para fechado productos OAK Latam</h2>
 
   <form id="formulario">
     <label for="producto">Producto:</label>
-    <input type="text" id="producto" placeholder="Ej: Açaí" required>
-
+    <input type="text" id="producto" required>
     <label for="lote">Lote:</label>
-    <input type="text" id="lote" placeholder="Ej: L234-08" required>
-
+    <input type="text" id="lote" required>
     <label for="fechaPrimaria">Fecha primaria:</label>
     <input type="date" id="fechaPrimaria" required>
-
     <label for="fechaAbierto">Fecha abierto:</label>
     <input type="date" id="fechaAbierto" required>
-
-    <label for="fechaVencimientoAbierto">Fecha vencimiento abierto:</label>
-    <input type="date" id="fechaVencimientoAbierto" required>
-
+    <label for="venceAbierto">Vence abierto:</label>
+    <input type="date" id="venceAbierto" required>
     <label for="responsable">Responsable:</label>
-    <input type="text" id="responsable" placeholder="Ej: Juan Pérez" required>
-
-    <button type="submit">Generar datos</button>
+    <input type="text" id="responsable" required>
+    <div>
+      <button type="button" class="btn" onclick="agregarEtiqueta()">Siguiente</button>
+      <button type="button" class="btn" onclick="window.print()">Imprimir</button>
+      <button type="button" class="btn" style="background-color:#6c757d" onclick="limpiarHoja()">Limpiar hoja</button>
+    </div>
   </form>
 
-  <div id="infoBox"></div>
-  <a id="downloadLink">Descargar imagen</a>
-  <button id="printBtn">Imprimir</button>
+  <div id="printArea">
+    <div id="etiquetas-grid"></div>
+  </div>
 
   <script>
-    const form = document.getElementById('formulario');
-    const infoBox = document.getElementById('infoBox');
-    const downloadLink = document.getElementById('downloadLink');
-    const printBtn = document.getElementById('printBtn');
+    const grid = document.getElementById('etiquetas-grid');
+    let etiquetas = [];
 
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
+    function crearHTML(etiqueta) {
+      return `
+        <div class="etiqueta">
+          <div class="linea"><div class="label">Producto:</div><div class="campo">${etiqueta.producto}</div></div>
+          <div class="linea"><div class="label">Lote:</div><div class="campo">${etiqueta.lote}</div></div>
+          <div class="linea"><div class="label">Fecha primaria:</div><div class="campo">${etiqueta.fechaPrimaria}</div></div>
+          <div class="linea"><div class="label">Fecha abierto:</div><div class="campo">${etiqueta.fechaAbierto}</div></div>
+          <div class="linea"><div class="label">Vence abierto:</div><div class="campo">${etiqueta.venceAbierto}</div></div>
+          <div class="linea"><div class="label">Responsable:</div><div class="campo">${etiqueta.responsable}</div></div>
+        </div>
+      `;
+    }
 
-      const producto = document.getElementById('producto').value.trim();
-      const lote = document.getElementById('lote').value.trim();
-      const fechaPrimaria = document.getElementById('fechaPrimaria').value;
-      const fechaAbierto = document.getElementById('fechaAbierto').value;
-      const fechaVencimiento = document.getElementById('fechaVencimientoAbierto').value;
-      const responsable = document.getElementById('responsable').value.trim();
+    function agregarEtiqueta() {
+      if (etiquetas.length >= 25) {
+        alert('Ya has llenado las 25 etiquetas.');
+        return;
+      }
 
-      const textoQR =
-        `Producto: ${producto}\n` +
-        `Lote: ${lote}\n` +
-        `Fecha primaria: ${fechaPrimaria}\n` +
-        `Fecha abierto: ${fechaAbierto}\n` +
-        `Vence abierto: ${fechaVencimiento}\n` +
-        `Responsable: ${responsable}`;
-
-      infoBox.textContent = textoQR;
-      infoBox.style.display = "block";
-
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-
-      canvas.width = 400;
-      canvas.height = 220;
-
-      ctx.fillStyle = "#FFFFFF";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "#000000";
-      ctx.font = "bold 16px Georgia";
-      ctx.textAlign = "left";
-
-      const lines = textoQR.split("\n");
-      lines.forEach((line, i) => {
-        ctx.fillText(line, 20, 40 + i * 30);
-      });
-
-      canvas.toBlob(blob => {
-        const url = URL.createObjectURL(blob);
-        downloadLink.href = url;
-        downloadLink.download = `Datos_${producto}.png`;
-        downloadLink.style.display = "inline-block";
-        printBtn.style.display = "inline-block";
-      });
-
-      printBtn.onclick = () => {
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write('<html><head><title>Imprimir</title></head><body style="margin:0"><img src="' + canvas.toDataURL() + '" style="width:100%"></body></html>');
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.print();
+      const nueva = {
+        producto: document.getElementById('producto').value,
+        lote: document.getElementById('lote').value,
+        fechaPrimaria: document.getElementById('fechaPrimaria').value,
+        fechaAbierto: document.getElementById('fechaAbierto').value,
+        venceAbierto: document.getElementById('venceAbierto').value,
+        responsable: document.getElementById('responsable').value
       };
-    });
+
+      etiquetas.push(nueva);
+      renderizarEtiquetas();
+    }
+
+    function limpiarHoja() {
+      etiquetas = [];
+      grid.innerHTML = '';
+    }
+
+    function renderizarEtiquetas() {
+      grid.innerHTML = '';
+      etiquetas.forEach(etiqueta => {
+        grid.innerHTML += crearHTML(etiqueta);
+      });
+    }
   </script>
 </body>
 </html>
