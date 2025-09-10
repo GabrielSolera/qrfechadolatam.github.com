@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QR para fechado productos OAK Latam</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <style>
     body {
       background-color: #2f006e;
@@ -76,6 +77,8 @@
       white-space: pre-line;
       background-color: white;
       color: black;
+      font-family: 'Poppins', sans-serif;
+      position: relative;
     }
     .linea {
       display: flex;
@@ -89,6 +92,14 @@
       flex-grow: 1;
       border-bottom: 0.5px dotted #000;
       min-width: 30px;
+    }
+    .timestamp {
+      font-size: 6pt;
+      color: rgba(0, 0, 0, 0.4);
+      position: absolute;
+      bottom: 2mm;
+      right: 2mm;
+      text-align: right;
     }
     @media print {
       body * { visibility: hidden; }
@@ -144,7 +155,7 @@
     const grid = document.getElementById('etiquetas-grid');
     let etiquetas = [];
 
-    function crearHTML(etiqueta) {
+    function crearHTML(etiqueta, fechaHora) {
       return `
         <div class="etiqueta">
           <div class="linea"><div class="label">Producto:</div><div class="campo">${etiqueta.producto}</div></div>
@@ -153,6 +164,7 @@
           <div class="linea"><div class="label">Fecha abierto:</div><div class="campo">${etiqueta.fechaAbierto}</div></div>
           <div class="linea"><div class="label">Vence abierto:</div><div class="campo">${etiqueta.venceAbierto}</div></div>
           <div class="linea"><div class="label">Responsable:</div><div class="campo">${etiqueta.responsable}</div></div>
+          <div class="timestamp">${fechaHora}</div>
         </div>
       `;
     }
@@ -172,7 +184,13 @@
         responsable: document.getElementById('responsable').value
       };
 
-      etiquetas.push(nueva);
+      const ahora = new Date();
+      const fechaHora = ahora.toLocaleString('es-CR', {
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        day: '2-digit', month: '2-digit', year: 'numeric'
+      });
+
+      etiquetas.push({ ...nueva, fechaHora });
       renderizarEtiquetas();
     }
 
@@ -184,7 +202,7 @@
     function renderizarEtiquetas() {
       grid.innerHTML = '';
       etiquetas.forEach(etiqueta => {
-        grid.innerHTML += crearHTML(etiqueta);
+        grid.innerHTML += crearHTML(etiqueta, etiqueta.fechaHora);
       });
     }
   </script>
