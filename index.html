@@ -68,13 +68,12 @@
     }
     .etiqueta {
       border: 1px solid #000;
-      font-size: 7pt;
+      font-size: 8pt;
       padding: 2mm;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-      white-space: pre-line;
       background-color: white;
       color: black;
       font-family: 'Poppins', sans-serif;
@@ -82,16 +81,18 @@
     }
     .linea {
       display: flex;
-      gap: 4px;
+      justify-content: space-between;
+      font-size: 7.5pt;
+      margin-bottom: 1px;
     }
     .label {
-      font-weight: bold;
-      flex-shrink: 0;
+      font-weight: 600;
     }
     .campo {
-      flex-grow: 1;
+      font-weight: 400;
       border-bottom: 0.5px dotted #000;
-      min-width: 30px;
+      padding-left: 4px;
+      white-space: nowrap;
     }
     .timestamp {
       font-size: 6pt;
@@ -155,14 +156,20 @@
     const grid = document.getElementById('etiquetas-grid');
     let etiquetas = [];
 
+    function formatDate(fechaStr) {
+      if (!fechaStr) return '';
+      const [a, m, d] = fechaStr.split('-');
+      return `${d}/${m}/${a.slice(2)}`;
+    }
+
     function crearHTML(etiqueta, fechaHora) {
       return `
         <div class="etiqueta">
           <div class="linea"><div class="label">Producto:</div><div class="campo">${etiqueta.producto}</div></div>
           <div class="linea"><div class="label">Lote:</div><div class="campo">${etiqueta.lote}</div></div>
-          <div class="linea"><div class="label">Fecha primaria:</div><div class="campo">${etiqueta.fechaPrimaria}</div></div>
-          <div class="linea"><div class="label">Fecha abierto:</div><div class="campo">${etiqueta.fechaAbierto}</div></div>
-          <div class="linea"><div class="label">Vence abierto:</div><div class="campo">${etiqueta.venceAbierto}</div></div>
+          <div class="linea"><div class="label">Fecha primaria:</div><div class="campo">${formatDate(etiqueta.fechaPrimaria)}</div></div>
+          <div class="linea"><div class="label">Fecha abierto:</div><div class="campo">${formatDate(etiqueta.fechaAbierto)}</div></div>
+          <div class="linea"><div class="label">Vence abierto:</div><div class="campo">${formatDate(etiqueta.venceAbierto)}</div></div>
           <div class="linea"><div class="label">Responsable:</div><div class="campo">${etiqueta.responsable}</div></div>
           <div class="timestamp">${fechaHora}</div>
         </div>
@@ -186,8 +193,8 @@
 
       const ahora = new Date();
       const fechaHora = ahora.toLocaleString('es-CR', {
-        hour: '2-digit', minute: '2-digit', second: '2-digit',
-        day: '2-digit', month: '2-digit', year: 'numeric'
+        hour: '2-digit', minute: '2-digit',
+        day: '2-digit', month: '2-digit', year: '2-digit'
       });
 
       etiquetas.push({ ...nueva, fechaHora });
