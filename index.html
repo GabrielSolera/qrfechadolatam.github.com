@@ -2,80 +2,139 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Etiqueta OAK Latam</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QR para fechado productos OAK Latam</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       background-color: #2f006e;
-      font-family: 'Georgia', serif;
+      font-family: 'Poppins', sans-serif;
       color: white;
       text-align: center;
       margin: 0;
       padding-top: 20px;
     }
 
-    input, label, button {
-      display: block;
-      margin: 10px auto;
-      width: 280px;
+    .logo img {
+      width: 120px;
+      height: auto;
+    }
+
+    .banderas img {
+      width: 35px;
+      height: 35px;
+      margin: 0 6px;
+      border-radius: 50%;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin: 10px 0 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    label {
+      margin-top: 15px;
       font-weight: bold;
     }
 
     input {
       padding: 10px;
-      border-radius: 5px;
+      width: 280px;
       border: none;
-      background: #f5eee0;
+      border-radius: 5px;
+      background-color: #f5eee0;
+      font-weight: bold;
       text-align: center;
     }
 
     button {
-      padding: 10px;
+      margin: 10px;
+      padding: 10px 20px;
+      background-color: #e63946;
+      color: white;
       border: none;
       border-radius: 5px;
-      background-color: #f5eee0;
-      color: #2f006e;
+      font-weight: bold;
       cursor: pointer;
-      font-weight: bold;
     }
 
-    #etiqueta {
-      display: none;
-      width: 50mm;
-      height: 30mm;
-      font-size: 12pt;
-      color: #000;
-      font-family: Georgia, serif;
-      font-weight: bold;
-      padding: 10px;
+    #etiquetas {
+      display: grid;
+      grid-template-columns: repeat(6, 38mm);
+      gap: 0.3cm 0.3cm;
+      justify-content: center;
+      margin: 0.3cm;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    .etiqueta {
+      width: 38mm;
+      height: 25mm;
+      background: white;
+      color: black;
+      border: 1px solid black;
+      font-size: 10px;
+      padding: 4px;
+      padding-bottom: 18px;
       box-sizing: border-box;
+      position: relative;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      line-height: 1.2;
     }
 
-    @media print {
-      body * {
-        visibility: hidden;
-      }
-      #etiqueta, #etiqueta * {
-        visibility: visible;
-      }
-      #etiqueta {
-        position: absolute;
-        top: 0;
-        left: 0;
-      }
+    .etiqueta span {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .timestamp {
+      position: absolute;
+      bottom: 2px;
+      right: 4px;
+      font-size: 8px;
+      color: rgba(0, 0, 0, 0.4);
+      pointer-events: none;
+    }
+
+    #botones {
+      margin-top: 20px;
+    }
+
+    #botones button {
+      margin: 0 5px;
     }
   </style>
 </head>
 <body>
+  <div class="logo">
+    <img src="Logo_Primary_Macaw_Offwhite (2).png" alt="Logo OAK">
+  </div>
 
-  <h1>Generador de Etiquetas OAK Latam</h1>
+  <div class="banderas">
+    <img src="cr.jpg" alt="Costa Rica">
+    <img src="pa.jpg" alt="Panamá">
+    <img src="gt.png" alt="Guatemala">
+    <img src="sv.jpg" alt="El Salvador">
+  </div>
+
+  <h1>QR para fechado productos OAK Latam</h1>
 
   <form id="formulario">
     <label for="producto">Producto:</label>
-    <input type="text" id="producto" required>
+    <input type="text" id="producto" maxlength="13" placeholder="Ej: Açaí" required>
 
     <label for="lote">Lote:</label>
-    <input type="text" id="lote" required>
+    <input type="text" id="lote" placeholder="Ej: L234-08" required>
 
     <label for="fechaPrimaria">Fecha primaria:</label>
     <input type="date" id="fechaPrimaria" required>
@@ -83,44 +142,93 @@
     <label for="fechaAbierto">Fecha abierto:</label>
     <input type="date" id="fechaAbierto" required>
 
-    <label for="fechaVencimiento">Vence abierto:</label>
-    <input type="date" id="fechaVencimiento" required>
+    <label for="fechaVencimientoAbierto">Fecha vencimiento abierto:</label>
+    <input type="date" id="fechaVencimientoAbierto" required>
 
     <label for="responsable">Responsable:</label>
-    <input type="text" id="responsable" required>
+    <input type="text" id="responsable" placeholder="Ej: Juan Pérez" required>
 
-    <button type="submit">Imprimir etiqueta</button>
+    <div id="botones">
+      <button type="submit">Siguiente</button>
+      <button type="button" onclick="imprimir()">Imprimir</button>
+      <button type="button" onclick="limpiarHoja()" style="background:#6c757d">Limpiar hoja</button>
+    </div>
   </form>
 
-  <div id="etiqueta"></div>
+  <div id="etiquetas"></div>
 
   <script>
     const form = document.getElementById('formulario');
-    const etiqueta = document.getElementById('etiqueta');
+    const etiquetasDiv = document.getElementById('etiquetas');
+    let etiquetas = [];
 
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', function (e) {
       e.preventDefault();
+      if (etiquetas.length >= 36) return alert("Ya completaste las 36 etiquetas.");
 
-      const producto = document.getElementById('producto').value;
-      const lote = document.getElementById('lote').value;
-      const fechaPrimaria = document.getElementById('fechaPrimaria').value;
-      const fechaAbierto = document.getElementById('fechaAbierto').value;
-      const fechaVencimiento = document.getElementById('fechaVencimiento').value;
-      const responsable = document.getElementById('responsable').value;
+      const producto = document.getElementById('producto').value.trim();
+      const lote = document.getElementById('lote').value.trim();
+      const fechaPrimariaInput = document.getElementById('fechaPrimaria');
+      const fechaAbiertoInput = document.getElementById('fechaAbierto');
+      const fechaVencimientoInput = document.getElementById('fechaVencimientoAbierto');
+      const responsable = document.getElementById('responsable').value.trim();
 
+      const fechaPrimaria = new Date(fechaPrimariaInput.value);
+      const fechaAbierto = new Date(fechaAbiertoInput.value);
+      const fechaVencimiento = new Date(fechaVencimientoInput.value);
+
+      if (fechaVencimiento < fechaAbierto) {
+        alert("La fecha de vencimiento no puede ser anterior a la fecha de apertura.");
+        return;
+      }
+      if (fechaVencimiento > fechaPrimaria) {
+        alert("La fecha de vencimiento no puede ser posterior a la fecha primaria.");
+        return;
+      }
+
+      const fechaPrimariaStr = formatearFecha(fechaPrimariaInput.value);
+      const fechaAbiertoStr = formatearFecha(fechaAbiertoInput.value);
+      const fechaVencimientoStr = formatearFecha(fechaVencimientoInput.value);
+
+      const etiqueta = document.createElement('div');
+      etiqueta.className = 'etiqueta';
       etiqueta.innerHTML = `
-        Producto: ${producto}<br>
-        Lote: ${lote}<br>
-        Fecha primaria: ${fechaPrimaria}<br>
-        Fecha abierto: ${fechaAbierto}<br>
-        Vence abierto: ${fechaVencimiento}<br>
-        Responsable: ${responsable}
+        <span><b>Producto:</b> <span>${producto}</span></span>
+        <span><b>Lote:</b> <span>${lote}</span></span>
+        <span><b>Fecha primaria:</b> <span>${fechaPrimariaStr}</span></span>
+        <span><b>Fecha abierto:</b> <span>${fechaAbiertoStr}</span></span>
+        <span><b>Vence abierto:</b> <span>${fechaVencimientoStr}</span></span>
+        <span><b>Responsable:</b> <span>${responsable}</span></span>
       `;
 
-      etiqueta.style.display = 'block';
+      const timestamp = document.createElement('div');
+      timestamp.className = 'timestamp';
+      const now = new Date();
+      timestamp.innerText = `${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ${formatearFecha(now)}`;
+      etiqueta.appendChild(timestamp);
 
-      window.print();
+      etiquetas.push(etiqueta);
+      etiquetasDiv.appendChild(etiqueta);
     });
+
+    function formatearFecha(fechaStr) {
+      const f = new Date(fechaStr);
+      return `${String(f.getDate()).padStart(2, '0')}/${String(f.getMonth() + 1).padStart(2, '0')}/${String(f.getFullYear()).slice(-2)}`;
+    }
+
+    function imprimir() {
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write('<html><head><title>Imprimir etiquetas</title><style>@page { margin: 0; } body { margin: 0; display: grid; grid-template-columns: repeat(6, 38mm); gap: 0.3cm 0.3cm; justify-content: center; padding: 0.3cm; font-family: Poppins, sans-serif; } .etiqueta { border: 1px solid black; width: 38mm; height: 30mm; box-sizing: border-box; font-size: 10px; padding: 4px; padding-bottom: 18px; position: relative; border-radius: 6px; display: flex; flex-direction: column; justify-content: flex-start; line-height: 1.2; } .etiqueta span { display: flex; justify-content: space-between; } .timestamp { position: absolute; bottom: 2px; right: 4px; font-size: 8px; color: rgba(0, 0, 0, 0.4); pointer-events: none; }</style></head><body>');
+      etiquetas.forEach(et => printWindow.document.body.appendChild(et.cloneNode(true)));
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+    function limpiarHoja() {
+      etiquetas = [];
+      etiquetasDiv.innerHTML = '';
+    }
   </script>
 </body>
 </html>
