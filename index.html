@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR para fechado productos OAK Latam</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Etiqueta OAK Latam</title>
   <style>
     body {
       background-color: #2f006e;
@@ -14,204 +13,114 @@
       margin: 0;
       padding-top: 20px;
     }
-    .logo img {
-      width: 120px;
-      height: auto;
-    }
-    .banderas img {
-      width: 35px;
-      height: 35px;
-      margin: 0 6px;
-      border-radius: 50%;
-    }
-    h2 {
-      font-size: 22px;
-      margin: 10px 0 20px;
-    }
-    form {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    label {
-      margin-top: 15px;
+
+    input, label, button {
+      display: block;
+      margin: 10px auto;
+      width: 280px;
       font-weight: bold;
     }
+
     input {
       padding: 10px;
-      width: 280px;
+      border-radius: 5px;
+      border: none;
+      background: #f5eee0;
+      text-align: center;
+    }
+
+    button {
+      padding: 10px;
       border: none;
       border-radius: 5px;
       background-color: #f5eee0;
-      font-weight: bold;
-      text-align: center;
-    }
-    .btn {
-      margin: 10px 6px;
-      padding: 10px 20px;
-      background-color: #e63946;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-weight: bold;
+      color: #2f006e;
       cursor: pointer;
+      font-weight: bold;
     }
-    #etiquetas-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 38mm);
-      grid-template-rows: repeat(5, 25mm);
-      gap: 3mm 5mm;
-      padding: 2mm 4mm;
+
+    #etiqueta {
+      display: none;
+      width: 50mm;
+      height: 30mm;
+      font-size: 12pt;
+      color: #000;
+      font-family: Georgia, serif;
+      font-weight: bold;
+      padding: 10px;
       box-sizing: border-box;
-      margin: 30px auto;
-      width: fit-content;
     }
-    .etiqueta {
-      border: 1px solid #000;
-      font-size: 8pt;
-      padding: 2mm;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      background-color: white;
-      color: black;
-      font-family: 'Poppins', sans-serif;
-      position: relative;
-    }
-    .linea {
-      display: flex;
-      justify-content: space-between;
-      font-size: 7.5pt;
-      margin-bottom: 1px;
-    }
-    .label {
-      font-weight: 600;
-    }
-    .campo {
-      font-weight: 400;
-      border-bottom: 0.5px dotted #000;
-      padding-left: 4px;
-      white-space: nowrap;
-    }
-    .timestamp {
-      font-size: 6pt;
-      color: rgba(0, 0, 0, 0.4);
-      position: absolute;
-      bottom: 2mm;
-      right: 2mm;
-      text-align: right;
-    }
+
     @media print {
-      body * { visibility: hidden; }
-      #printArea, #printArea * { visibility: visible; }
-      #printArea {
+      body * {
+        visibility: hidden;
+      }
+      #etiqueta, #etiqueta * {
+        visibility: visible;
+      }
+      #etiqueta {
         position: absolute;
         top: 0;
         left: 0;
-        width: 210mm;
-        height: 297mm;
       }
-      @page { size: A4; margin: 0; }
     }
   </style>
 </head>
 <body>
-  <div class="logo">
-    <img src="Logo_Primary_Macaw_Offwhite (2).png" alt="Logo OAK">
-  </div>
-  <div class="banderas">
-    <img src="cr.jpg" alt="Costa Rica">
-    <img src="pa.jpg" alt="Panamá">
-    <img src="gt.png" alt="Guatemala">
-    <img src="sv.jpg" alt="El Salvador">
-  </div>
-  <h2>QR para fechado productos OAK Latam</h2>
+
+  <h1>Generador de Etiquetas OAK Latam</h1>
 
   <form id="formulario">
     <label for="producto">Producto:</label>
     <input type="text" id="producto" required>
+
     <label for="lote">Lote:</label>
     <input type="text" id="lote" required>
+
     <label for="fechaPrimaria">Fecha primaria:</label>
     <input type="date" id="fechaPrimaria" required>
+
     <label for="fechaAbierto">Fecha abierto:</label>
     <input type="date" id="fechaAbierto" required>
-    <label for="venceAbierto">Vence abierto:</label>
-    <input type="date" id="venceAbierto" required>
+
+    <label for="fechaVencimiento">Vence abierto:</label>
+    <input type="date" id="fechaVencimiento" required>
+
     <label for="responsable">Responsable:</label>
     <input type="text" id="responsable" required>
-    <div>
-      <button type="button" class="btn" onclick="agregarEtiqueta()">Siguiente</button>
-      <button type="button" class="btn" onclick="window.print()">Imprimir</button>
-      <button type="button" class="btn" style="background-color:#6c757d" onclick="limpiarHoja()">Limpiar hoja</button>
-    </div>
+
+    <button type="submit">Imprimir etiqueta</button>
   </form>
 
-  <div id="printArea">
-    <div id="etiquetas-grid"></div>
-  </div>
+  <div id="etiqueta"></div>
 
   <script>
-    const grid = document.getElementById('etiquetas-grid');
-    let etiquetas = [];
+    const form = document.getElementById('formulario');
+    const etiqueta = document.getElementById('etiqueta');
 
-    function formatDate(fechaStr) {
-      if (!fechaStr) return '';
-      const [a, m, d] = fechaStr.split('-');
-      return `${d}/${m}/${a.slice(2)}`;
-    }
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
 
-    function crearHTML(etiqueta, fechaHora) {
-      return `
-        <div class="etiqueta">
-          <div class="linea"><div class="label">Producto:</div><div class="campo">${etiqueta.producto}</div></div>
-          <div class="linea"><div class="label">Lote:</div><div class="campo">${etiqueta.lote}</div></div>
-          <div class="linea"><div class="label">Fecha primaria:</div><div class="campo">${formatDate(etiqueta.fechaPrimaria)}</div></div>
-          <div class="linea"><div class="label">Fecha abierto:</div><div class="campo">${formatDate(etiqueta.fechaAbierto)}</div></div>
-          <div class="linea"><div class="label">Vence abierto:</div><div class="campo">${formatDate(etiqueta.venceAbierto)}</div></div>
-          <div class="linea"><div class="label">Responsable:</div><div class="campo">${etiqueta.responsable}</div></div>
-          <div class="timestamp">${fechaHora}</div>
-        </div>
+      const producto = document.getElementById('producto').value;
+      const lote = document.getElementById('lote').value;
+      const fechaPrimaria = document.getElementById('fechaPrimaria').value;
+      const fechaAbierto = document.getElementById('fechaAbierto').value;
+      const fechaVencimiento = document.getElementById('fechaVencimiento').value;
+      const responsable = document.getElementById('responsable').value;
+
+      etiqueta.innerHTML = `
+        Producto: ${producto}<br>
+        Lote: ${lote}<br>
+        Fecha primaria: ${fechaPrimaria}<br>
+        Fecha abierto: ${fechaAbierto}<br>
+        Vence abierto: ${fechaVencimiento}<br>
+        Responsable: ${responsable}
       `;
-    }
 
-    function agregarEtiqueta() {
-      if (etiquetas.length >= 25) {
-        alert('Ya has llenado las 25 etiquetas.');
-        return;
-      }
+      etiqueta.style.display = 'block';
 
-      const nueva = {
-        producto: document.getElementById('producto').value,
-        lote: document.getElementById('lote').value,
-        fechaPrimaria: document.getElementById('fechaPrimaria').value,
-        fechaAbierto: document.getElementById('fechaAbierto').value,
-        venceAbierto: document.getElementById('venceAbierto').value,
-        responsable: document.getElementById('responsable').value
-      };
-
-      const ahora = new Date();
-      const fechaHora = ahora.toLocaleString('es-CR', {
-        hour: '2-digit', minute: '2-digit',
-        day: '2-digit', month: '2-digit', year: '2-digit'
-      });
-
-      etiquetas.push({ ...nueva, fechaHora });
-      renderizarEtiquetas();
-    }
-
-    function limpiarHoja() {
-      etiquetas = [];
-      grid.innerHTML = '';
-    }
-
-    function renderizarEtiquetas() {
-      grid.innerHTML = '';
-      etiquetas.forEach(etiqueta => {
-        grid.innerHTML += crearHTML(etiqueta, etiqueta.fechaHora);
-      });
-    }
+      window.print();
+    });
   </script>
 </body>
 </html>
