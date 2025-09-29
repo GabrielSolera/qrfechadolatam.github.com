@@ -195,15 +195,15 @@
 
       const producto = document.getElementById('producto').value.trim();
       const lote = document.getElementById('lote').value.trim();
-      const fechaPrimariaInput = document.getElementById('fechaPrimaria');
-      const fechaAbiertoInput = document.getElementById('fechaAbierto');
-      const fechaVencimientoInput = document.getElementById('fechaVencimientoAbierto');
+      const fechaPrimariaVal = document.getElementById('fechaPrimaria').value;
+      const fechaAbiertoVal = document.getElementById('fechaAbierto').value;
+      const fechaVencimientoVal = document.getElementById('fechaVencimientoAbierto').value;
       const responsable = document.getElementById('responsable').value.trim();
 
-      // Comparaciones usando Date para lógica
-      const fechaPrimariaDate = new Date(fechaPrimariaInput.value);
-      const fechaAbiertoDate = new Date(fechaAbiertoInput.value);
-      const fechaVencimientoDate = new Date(fechaVencimientoInput.value);
+      // Validación usando Date solo para lógica
+      const fechaPrimariaDate = new Date(fechaPrimariaVal);
+      const fechaAbiertoDate = new Date(fechaAbiertoVal);
+      const fechaVencimientoDate = new Date(fechaVencimientoVal);
 
       if (fechaVencimientoDate < fechaAbiertoDate) {
         alert("La fecha de vencimiento no puede ser anterior a la fecha de apertura.");
@@ -214,10 +214,10 @@
         return;
       }
 
-      // Formateo sin desfase
-      const fechaPrimariaStr = formatearFecha(fechaPrimariaInput.value);
-      const fechaAbiertoStr = formatearFecha(fechaAbiertoInput.value);
-      const fechaVencimientoStr = formatearFecha(fechaVencimientoInput.value);
+      // Mostrar fechas sin desfase
+      const fechaPrimariaStr = formatearFecha(fechaPrimariaVal);
+      const fechaAbiertoStr = formatearFecha(fechaAbiertoVal);
+      const fechaVencimientoStr = formatearFecha(fechaVencimientoVal);
 
       const etiqueta = document.createElement('div');
       etiqueta.className = 'etiqueta';
