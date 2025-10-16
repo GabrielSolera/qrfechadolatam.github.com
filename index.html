@@ -538,14 +538,18 @@
     function calcularFechaVencimiento() {
       if (!selectedProduct || !fechaAbiertoInput.value) return;
 
-      const fechaAbierto = new Date(fechaAbiertoInput.value);
+      // Parsear la fecha correctamente para evitar problemas de zona horaria
+      const [year, month, day] = fechaAbiertoInput.value.split('-').map(Number);
+      const fechaAbierto = new Date(year, month - 1, day);
+      
+      // Sumar los días de vida útil
       fechaAbierto.setDate(fechaAbierto.getDate() + selectedProduct.diasVida);
       
-      const year = fechaAbierto.getFullYear();
-      const month = String(fechaAbierto.getMonth() + 1).padStart(2, '0');
-      const day = String(fechaAbierto.getDate()).padStart(2, '0');
+      const yearVenc = fechaAbierto.getFullYear();
+      const monthVenc = String(fechaAbierto.getMonth() + 1).padStart(2, '0');
+      const dayVenc = String(fechaAbierto.getDate()).padStart(2, '0');
       
-      fechaVencimientoInput.value = `${year}-${month}-${day}`;
+      fechaVencimientoInput.value = `${yearVenc}-${monthVenc}-${dayVenc}`;
     }
 
     form.addEventListener('submit', function (e) {
