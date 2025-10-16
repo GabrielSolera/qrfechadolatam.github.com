@@ -144,10 +144,15 @@
       color: rgba(255, 255, 255, 0.9);
     }
 
+    .input-container {
+      position: relative;
+      width: 100%;
+      max-width: 320px;
+    }
+
     input {
       padding: 12px 16px;
       width: 100%;
-      max-width: 320px;
       border: none;
       border-radius: 10px;
       background: linear-gradient(135deg, #f5eee0 0%, #fffef7 100%);
@@ -163,6 +168,49 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 16px rgba(230, 57, 70, 0.3);
       background: linear-gradient(135deg, #fff 0%, #fffef7 100%);
+    }
+
+    input:disabled {
+      background: linear-gradient(135deg, #e0e0e0 0%, #f0f0f0 100%);
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .autocomplete-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 10px;
+      margin-top: 5px;
+      max-height: 200px;
+      overflow-y: auto;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      display: none;
+    }
+
+    .autocomplete-list.active {
+      display: block;
+    }
+
+    .autocomplete-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      color: #2d3436;
+      text-align: left;
+      border-bottom: 1px solid #f0f0f0;
+      transition: all 0.2s ease;
+    }
+
+    .autocomplete-item:hover {
+      background: linear-gradient(135deg, #e63946 0%, #ff4757 100%);
+      color: white;
+    }
+
+    .autocomplete-item:last-child {
+      border-bottom: none;
     }
 
     button {
@@ -286,6 +334,13 @@
       font-style: italic;
     }
 
+    .loading {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      margin-top: 10px;
+      font-style: italic;
+    }
+
     @media print {
       body {
         margin: 0;
@@ -354,7 +409,11 @@
 
   <form id="formulario">
     <label for="producto">Producto:</label>
-    <input type="text" id="producto" maxlength="13" placeholder="Ej: Açaí" required>
+    <div class="input-container">
+      <input type="text" id="producto" maxlength="30" placeholder="Empieza a escribir..." autocomplete="off" required>
+      <div id="autocomplete-list" class="autocomplete-list"></div>
+    </div>
+    <div id="loading" class="loading" style="display: none;">Cargando productos...</div>
 
     <label for="lote">Lote:</label>
     <input type="text" id="lote" placeholder="Ej: L234-08" required>
@@ -366,7 +425,7 @@
     <input type="date" id="fechaAbierto" required>
 
     <label for="fechaVencimientoAbierto">Fecha vencimiento abierto:</label>
-    <input type="date" id="fechaVencimientoAbierto" required>
+    <input type="date" id="fechaVencimientoAbierto" disabled required>
 
     <label for="responsable">Responsable:</label>
     <input type="text" id="responsable" placeholder="Ej: Juan Pérez" required>
@@ -384,13 +443,119 @@
   <div id="etiquetas"></div>
 
   <script>
+    // URL de Google Sheets con los productos y días de vida útil
+    const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRHsWD6WOIdawu2wH6bXvZpCcYsBpvflIK7zTJPiv_P4bSvlTj18LrmuoJcxUOVqt9UoMD6CGi0AgZS/pub?gid=0&single=true&output=csv';
+    
     const form = document.getElementById('formulario');
     const etiquetasDiv = document.getElementById('etiquetas');
+    const productoInput = document.getElementById('producto');
+    const autocompleteList = document.getElementById('autocomplete-list');
+    const fechaAbiertoInput = document.getElementById('fechaAbierto');
+    const fechaVencimientoInput = document.getElementById('fechaVencimientoAbierto');
+    const loadingDiv = document.getElementById('loading');
+    
     let etiquetas = [];
+    let productosData = [];
+    let selectedProduct = null;
+
+    // Cargar productos desde Google Sheets
+    async function cargarProductos() {
+      try {
+        loadingDiv.style.display = 'block';
+        const response = await fetch(GOOGLE_SHEET_URL);
+        const csvText = await response.text();
+        
+        // Parsear CSV
+        const lines = csvText.trim().split('\n');
+        productosData = lines.slice(1).map(line => {
+          const [producto, dias] = line.split(',');
+          return {
+            nombre: producto.trim(),
+            diasVida: parseInt(dias.trim())
+          };
+        }).filter(p => p.nombre && !isNaN(p.diasVida));
+        
+        loadingDiv.style.display = 'none';
+        console.log('Productos cargados:', productosData);
+      } catch (error) {
+        console.error('Error al cargar productos:', error);
+        loadingDiv.textContent = '⚠️ Error al cargar productos. Verifica la URL.';
+        // Datos de ejemplo si falla la carga
+        productosData = [
+          { nombre: 'Açaí', diasVida: 3 },
+          { nombre: 'Pitaya', diasVida: 5 },
+          { nombre: 'Mango', diasVida: 7 },
+          { nombre: 'Fresa', diasVida: 4 },
+          { nombre: 'Plátano', diasVida: 2 }
+        ];
+      }
+    }
+
+    // Autocompletado
+    productoInput.addEventListener('input', function() {
+      const valor = this.value.toLowerCase();
+      autocompleteList.innerHTML = '';
+      selectedProduct = null;
+      
+      if (!valor) {
+        autocompleteList.classList.remove('active');
+        return;
+      }
+
+      const filtrados = productosData.filter(p => 
+        p.nombre.toLowerCase().includes(valor)
+      );
+
+      if (filtrados.length > 0) {
+        autocompleteList.classList.add('active');
+        filtrados.forEach(producto => {
+          const item = document.createElement('div');
+          item.className = 'autocomplete-item';
+          item.textContent = `${producto.nombre} (${producto.diasVida} días)`;
+          item.addEventListener('click', () => {
+            productoInput.value = producto.nombre;
+            selectedProduct = producto;
+            autocompleteList.classList.remove('active');
+            calcularFechaVencimiento();
+          });
+          autocompleteList.appendChild(item);
+        });
+      } else {
+        autocompleteList.classList.remove('active');
+      }
+    });
+
+    // Cerrar autocomplete al hacer clic fuera
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.input-container')) {
+        autocompleteList.classList.remove('active');
+      }
+    });
+
+    // Calcular fecha de vencimiento automáticamente
+    fechaAbiertoInput.addEventListener('change', calcularFechaVencimiento);
+
+    function calcularFechaVencimiento() {
+      if (!selectedProduct || !fechaAbiertoInput.value) return;
+
+      const fechaAbierto = new Date(fechaAbiertoInput.value);
+      fechaAbierto.setDate(fechaAbierto.getDate() + selectedProduct.diasVida);
+      
+      const year = fechaAbierto.getFullYear();
+      const month = String(fechaAbierto.getMonth() + 1).padStart(2, '0');
+      const day = String(fechaAbierto.getDate()).padStart(2, '0');
+      
+      fechaVencimientoInput.value = `${year}-${month}-${day}`;
+    }
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       
+      if (!selectedProduct) {
+        alert('Por favor selecciona un producto de la lista.');
+        return;
+      }
+
       const cantidadSolicitada = parseInt(document.getElementById('cantidad').value);
       const espacioDisponible = 36 - etiquetas.length;
       
@@ -398,11 +563,11 @@
         return alert(`Solo puedes agregar ${espacioDisponible} etiquetas más. Actualmente tienes ${etiquetas.length}/36.`);
       }
 
-      const producto = document.getElementById('producto').value.trim();
+      const producto = productoInput.value.trim();
       const lote = document.getElementById('lote').value.trim();
       const fechaPrimariaVal = document.getElementById('fechaPrimaria').value;
-      const fechaAbiertoVal = document.getElementById('fechaAbierto').value;
-      const fechaVencimientoVal = document.getElementById('fechaVencimientoAbierto').value;
+      const fechaAbiertoVal = fechaAbiertoInput.value;
+      const fechaVencimientoVal = fechaVencimientoInput.value;
       const responsable = document.getElementById('responsable').value.trim();
 
       // Validación usando Date solo para lógica
@@ -447,7 +612,6 @@
         etiquetas.push(etiqueta);
         etiquetasDiv.appendChild(etiqueta);
         
-        // Animar al agregar
         setTimeout(() => {
           etiqueta.style.animation = 'none';
         }, 500 + (i * 100));
@@ -458,17 +622,17 @@
       setTimeout(() => {
         form.reset();
         document.getElementById('cantidad').value = '1';
+        selectedProduct = null;
+        fechaVencimientoInput.value = '';
         form.style.opacity = '1';
       }, 200);
     });
 
-    // Formatea cadena 'YYYY-MM-DD' a 'DD/MM/YY'
     function formatearFecha(fechaStr) {
       const [year, month, day] = fechaStr.split("-");
       return `${day}/${month}/${year.slice(-2)}`;
     }
 
-    // Para timestamp actual
     function formatearFechaLocal(dateObj) {
       const d = dateObj.getDate().toString().padStart(2, '0');
       const m = (dateObj.getMonth() + 1).toString().padStart(2, '0');
@@ -488,7 +652,6 @@
     function limpiarHoja() {
       if (!confirm('¿Estás seguro de que quieres limpiar todas las etiquetas?')) return;
       
-      // Animar salida
       document.querySelectorAll('.etiqueta').forEach((et, i) => {
         setTimeout(() => {
           et.style.animation = 'slideOut 0.3s ease-out forwards';
@@ -500,6 +663,9 @@
         etiquetasDiv.innerHTML = '';
       }, 500);
     }
+
+    // Cargar productos al iniciar
+    cargarProductos();
   </script>
 </body>
 </html>
