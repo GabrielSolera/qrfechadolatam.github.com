@@ -6,102 +6,284 @@
   <title>Etiquetas para fechado de productos OAK Latam</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      background-color: #2f006e;
+      background: linear-gradient(135deg, #2f006e 0%, #4a0e8f 50%, #2f006e 100%);
       font-family: 'Poppins', sans-serif;
       color: white;
       text-align: center;
       margin: 0;
-      padding-top: 20px;
+      padding: 20px;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(230, 57, 70, 0.1) 0%, transparent 70%);
+      animation: pulse 15s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.3; }
+      50% { transform: scale(1.1) rotate(180deg); opacity: 0.5; }
+    }
+
+    .logo {
+      animation: fadeInDown 0.8s ease-out;
+      position: relative;
+      z-index: 1;
     }
 
     .logo img {
-      width: 120px;
+      width: 140px;
       height: auto;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+      transition: transform 0.3s ease;
+    }
+
+    .logo img:hover {
+      transform: scale(1.05) rotate(2deg);
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .banderas {
+      animation: fadeIn 1s ease-out 0.3s backwards;
+      position: relative;
+      z-index: 1;
+      margin: 20px 0;
     }
 
     .banderas img {
-      width: 35px;
-      height: 35px;
-      margin: 0 6px;
+      width: 40px;
+      height: 40px;
+      margin: 0 8px;
       border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .banderas img:hover {
+      transform: translateY(-5px) scale(1.1);
+      border-color: #e63946;
+      box-shadow: 0 8px 16px rgba(230, 57, 70, 0.4);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     h1 {
-      font-size: 22px;
-      margin: 10px 0 20px;
+      font-size: 26px;
+      margin: 20px 0 30px;
+      animation: fadeIn 1s ease-out 0.5s backwards;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      letter-spacing: 0.5px;
     }
 
     form {
       display: flex;
       flex-direction: column;
       align-items: center;
+      animation: fadeInUp 1s ease-out 0.7s backwards;
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 400px;
+      margin: 0 auto;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: opacity 0.3s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     label {
       margin-top: 15px;
-      font-weight: bold;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255, 255, 255, 0.9);
     }
 
     input {
-      padding: 10px;
-      width: 280px;
+      padding: 12px 16px;
+      width: 100%;
+      max-width: 320px;
       border: none;
-      border-radius: 5px;
-      background-color: #f5eee0;
-      font-weight: bold;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f5eee0 0%, #fffef7 100%);
+      font-weight: 600;
       text-align: center;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    input:focus {
+      outline: none;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(230, 57, 70, 0.3);
+      background: linear-gradient(135deg, #fff 0%, #fffef7 100%);
     }
 
     button {
       margin: 10px;
-      padding: 10px 20px;
-      background-color: #e63946;
+      padding: 12px 28px;
+      background: linear-gradient(135deg, #e63946 0%, #ff4757 100%);
       color: white;
       border: none;
-      border-radius: 5px;
-      font-weight: bold;
+      border-radius: 10px;
+      font-weight: 600;
       cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(230, 57, 70, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 13px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    button:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(230, 57, 70, 0.6);
+    }
+
+    button:active {
+      transform: translateY(-1px);
     }
 
     #etiquetas {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 16px;
       justify-content: center;
-      margin: 20px;
+      margin: 40px 20px;
+      position: relative;
+      z-index: 1;
     }
 
     .etiqueta {
-      background: white;
-      color: black;
-      border: 1px solid black;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      color: #2d3436;
+      border: 2px solid #e0e0e0;
       font-size: 10px;
-      padding: 4px;
-      padding-bottom: 18px;
-      border-radius: 6px;
+      padding: 8px;
+      padding-bottom: 20px;
+      border-radius: 12px;
       position: relative;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-      line-height: 1.2;
+      line-height: 1.3;
       box-sizing: border-box;
       width: 100%;
       height: auto;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: slideIn 0.5s ease-out backwards;
+      transform-origin: center;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    @keyframes slideOut {
+      to {
+        opacity: 0;
+        transform: scale(0.8) translateY(-20px);
+      }
+    }
+
+    .etiqueta:hover {
+      transform: translateY(-8px) scale(1.03);
+      box-shadow: 0 12px 24px rgba(230, 57, 70, 0.3);
+      border-color: #e63946;
     }
 
     .etiqueta span {
       display: flex;
       justify-content: space-between;
+      padding: 2px 0;
+    }
+
+    .etiqueta span b {
+      color: #2f006e;
     }
 
     .timestamp {
       position: absolute;
-      bottom: 2px;
-      right: 4px;
+      bottom: 3px;
+      right: 6px;
       font-size: 8px;
-      color: rgba(0, 0, 0, 0.4);
+      color: rgba(0, 0, 0, 0.3);
       pointer-events: none;
+      font-style: italic;
     }
 
     @media print {
@@ -134,11 +316,25 @@
     }
 
     #botones {
-      margin-top: 20px;
+      margin-top: 25px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
     }
 
     #botones button {
-      margin: 0 5px;
+      margin: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    #botones button:nth-child(3) {
+      background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    }
+
+    #botones button:nth-child(3):hover {
+      box-shadow: 0 6px 20px rgba(108, 117, 125, 0.5);
     }
   </style>
 </head>
@@ -178,7 +374,7 @@
     <div id="botones">
       <button type="submit">Siguiente</button>
       <button type="button" onclick="imprimir()">Imprimir</button>
-      <button type="button" onclick="limpiarHoja()" style="background:#6c757d">Limpiar hoja</button>
+      <button type="button" onclick="limpiarHoja()">Limpiar hoja</button>
     </div>
   </form>
 
@@ -238,6 +434,18 @@
 
       etiquetas.push(etiqueta);
       etiquetasDiv.appendChild(etiqueta);
+      
+      // Animar al agregar
+      setTimeout(() => {
+        etiqueta.style.animation = 'none';
+      }, 500);
+      
+      // Limpiar formulario con animación
+      form.style.opacity = '0.7';
+      setTimeout(() => {
+        form.reset();
+        form.style.opacity = '1';
+      }, 200);
     });
 
     // Formatea cadena 'YYYY-MM-DD' a 'DD/MM/YY'
@@ -264,8 +472,19 @@
     }
 
     function limpiarHoja() {
-      etiquetas = [];
-      etiquetasDiv.innerHTML = '';
+      if (!confirm('¿Estás seguro de que quieres limpiar todas las etiquetas?')) return;
+      
+      // Animar salida
+      document.querySelectorAll('.etiqueta').forEach((et, i) => {
+        setTimeout(() => {
+          et.style.animation = 'slideOut 0.3s ease-out forwards';
+        }, i * 30);
+      });
+      
+      setTimeout(() => {
+        etiquetas = [];
+        etiquetasDiv.innerHTML = '';
+      }, 500);
     }
   </script>
 </body>
