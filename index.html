@@ -371,6 +371,9 @@
     <label for="responsable">Responsable:</label>
     <input type="text" id="responsable" placeholder="Ej: Juan Pérez" required>
 
+    <label for="cantidad">Cantidad de etiquetas:</label>
+    <input type="number" id="cantidad" min="1" max="36" value="1" placeholder="¿Cuántas?" required>
+
     <div id="botones">
       <button type="submit">Siguiente</button>
       <button type="button" onclick="imprimir()">Imprimir</button>
@@ -387,7 +390,13 @@
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      if (etiquetas.length >= 36) return alert("Ya completaste las 36 etiquetas.");
+      
+      const cantidadSolicitada = parseInt(document.getElementById('cantidad').value);
+      const espacioDisponible = 36 - etiquetas.length;
+      
+      if (cantidadSolicitada > espacioDisponible) {
+        return alert(`Solo puedes agregar ${espacioDisponible} etiquetas más. Actualmente tienes ${etiquetas.length}/36.`);
+      }
 
       const producto = document.getElementById('producto').value.trim();
       const lote = document.getElementById('lote').value.trim();
@@ -415,35 +424,40 @@
       const fechaAbiertoStr = formatearFecha(fechaAbiertoVal);
       const fechaVencimientoStr = formatearFecha(fechaVencimientoVal);
 
-      const etiqueta = document.createElement('div');
-      etiqueta.className = 'etiqueta';
-      etiqueta.innerHTML = `
-        <span><b>Producto:</b> <span>${producto}</span></span>
-        <span><b>Lote:</b> <span>${lote}</span></span>
-        <span><b>Fecha primaria:</b> <span>${fechaPrimariaStr}</span></span>
-        <span><b>Fecha abierto:</b> <span>${fechaAbiertoStr}</span></span>
-        <span><b>Vence abierto:</b> <span>${fechaVencimientoStr}</span></span>
-        <span><b>Responsable:</b> <span>${responsable}</span></span>
-      `;
+      // Crear múltiples etiquetas
+      for (let i = 0; i < cantidadSolicitada; i++) {
+        const etiqueta = document.createElement('div');
+        etiqueta.className = 'etiqueta';
+        etiqueta.style.animationDelay = `${i * 0.1}s`;
+        etiqueta.innerHTML = `
+          <span><b>Producto:</b> <span>${producto}</span></span>
+          <span><b>Lote:</b> <span>${lote}</span></span>
+          <span><b>Fecha primaria:</b> <span>${fechaPrimariaStr}</span></span>
+          <span><b>Fecha abierto:</b> <span>${fechaAbiertoStr}</span></span>
+          <span><b>Vence abierto:</b> <span>${fechaVencimientoStr}</span></span>
+          <span><b>Responsable:</b> <span>${responsable}</span></span>
+        `;
 
-      const timestamp = document.createElement('div');
-      timestamp.className = 'timestamp';
-      const now = new Date();
-      timestamp.innerText = `${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ${formatearFechaLocal(now)}`;
-      etiqueta.appendChild(timestamp);
+        const timestamp = document.createElement('div');
+        timestamp.className = 'timestamp';
+        const now = new Date();
+        timestamp.innerText = `${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ${formatearFechaLocal(now)}`;
+        etiqueta.appendChild(timestamp);
 
-      etiquetas.push(etiqueta);
-      etiquetasDiv.appendChild(etiqueta);
-      
-      // Animar al agregar
-      setTimeout(() => {
-        etiqueta.style.animation = 'none';
-      }, 500);
+        etiquetas.push(etiqueta);
+        etiquetasDiv.appendChild(etiqueta);
+        
+        // Animar al agregar
+        setTimeout(() => {
+          etiqueta.style.animation = 'none';
+        }, 500 + (i * 100));
+      }
       
       // Limpiar formulario con animación
       form.style.opacity = '0.7';
       setTimeout(() => {
         form.reset();
+        document.getElementById('cantidad').value = '1';
         form.style.opacity = '1';
       }, 200);
     });
