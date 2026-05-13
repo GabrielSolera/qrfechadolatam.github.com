@@ -622,7 +622,7 @@
   <div id="etiquetas"></div>
 
   <script>
-    // URL actualizada del Google Sheet con las 3 columnas
+    // URL actualizada del Google Sheet
     const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSMt8EYx-kpP0GhPH9jdVtDlhAcKIrEP5PrknCykTPXRH8rTKi5gN2n95sNFYU8BvG1kE2aKE-2XoFr/pub?gid=0&single=true&output=csv';
     
     const form = document.getElementById('formulario');
@@ -695,45 +695,67 @@
         const response = await fetch(GOOGLE_SHEET_URL);
         const csvText = await response.text();
         
+        console.log('CSV recibido:', csvText.substring(0, 500));
+        
         const lines = csvText.trim().split('\n');
-        productosData = lines.slice(1).map(line => {
-          // Parsear CSV correctamente manejando comas dentro de valores
-          const values = [];
+        productosData = [];
+        
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i];
+          if (!line.trim()) continue;
+          
+          // Parsear CSV manejando comas y comillas
+          const columns = [];
           let current = '';
           let inQuotes = false;
           
-          for (let char of line) {
+          for (let j = 0; j < line.length; j++) {
+            const char = line[j];
+            
             if (char === '"') {
               inQuotes = !inQuotes;
             } else if (char === ',' && !inQuotes) {
-              values.push(current.trim());
+              columns.push(current.trim());
               current = '';
             } else {
               current += char;
             }
           }
-          values.push(current.trim());
+          columns.push(current.trim());
           
-          const [producto, diasEmpaque, diasMostrador] = values;
+          // Columnas: A=Producto, B=Dias abierto, C=Dias mostrador
+          const producto = columns[0] || '';
+          const diasAbierto = columns[1] || '';
+          const diasMostrador = columns[2] || '';
           
-          // Parsear días de vida
-          let diasEmpaqueNum = parseInt(diasEmpaque);
-          let diasMostradorNum = parseInt(diasMostrador);
+          if (!producto) continue;
           
-          // Si dice "Vida util del empaque", usar null
-          if (diasEmpaque && diasEmpaque.toLowerCase().includes('vida util')) {
-            diasEmpaqueNum = null;
+          // Parsear días
+          let diasAbiertoNum = null;
+          let diasMostradorNum = null;
+          
+          // Para columna B (abierto)
+          if (diasAbierto && !diasAbierto.toLowerCase().includes('vida') && !diasAbierto.toLowerCase().includes('empaque')) {
+            const parsed = parseInt(diasAbierto);
+            if (!isNaN(parsed)) {
+              diasAbiertoNum = parsed;
+            }
           }
-          if (diasMostrador && diasMostrador.toLowerCase().includes('vida util')) {
-            diasMostradorNum = null;
+          
+          // Para columna C (mostrador)
+          if (diasMostrador && !diasMostrador.toLowerCase().includes('vida') && !diasMostrador.toLowerCase().includes('empaque')) {
+            const parsed = parseInt(diasMostrador);
+            if (!isNaN(parsed)) {
+              diasMostradorNum = parsed;
+            }
           }
           
-          return {
+          productosData.push({
             nombre: producto,
-            diasVidaEmpaque: diasEmpaqueNum,
+            diasVidaEmpaque: diasAbiertoNum,
             diasVidaMostrador: diasMostradorNum
-          };
-        }).filter(p => p.nombre);
+          });
+        }
         
         loadingDiv.style.display = 'none';
         console.log('Productos cargados:', productosData);
@@ -742,8 +764,7 @@
         loadingDiv.textContent = '⚠️ Error al cargar productos.';
         productosData = [
           { nombre: 'Sorbet Açai', diasVidaEmpaque: 6, diasVidaMostrador: 3 },
-          { nombre: 'Avena', diasVidaEmpaque: 30, diasVidaMostrador: 10 },
-          { nombre: 'Granola Avena y miel', diasVidaEmpaque: 30, diasVidaMostrador: 10 }
+          { nombre: 'Cacao Nibs', diasVidaEmpaque: 30, diasVidaMostrador: 10 }
         ];
       }
     }
@@ -768,7 +789,6 @@
           const item = document.createElement('div');
           item.className = 'autocomplete-item';
           
-          // Mostrar días según el modo activo
           let diasTexto = '';
           if (tipoFechado === 'empaque') {
             diasTexto = producto.diasVidaEmpaque !== null ? `${producto.diasVidaEmpaque} días` : 'Ver empaque';
@@ -802,6 +822,9 @@
     function calcularFechaVencimiento() {
       if (!selectedProduct) return;
 
+      console.log('Calculando fecha para:', selectedProduct);
+      console.log('Tipo fechado:', tipoFechado);
+
       if (tipoFechado === 'empaque' && fechaAbiertoInput.value) {
         if (selectedProduct.diasVidaEmpaque === null) {
           alert('Este producto usa la vida útil del empaque. Por favor ingresa la fecha manualmente.');
@@ -819,7 +842,11 @@
         const dayVenc = String(fechaAbierto.getDate()).padStart(2, '0');
         
         fechaVencimientoInput.value = `${yearVenc}-${monthVenc}-${dayVenc}`;
+        console.log('Fecha empaque calculada:', fechaVencimientoInput.value);
+        
       } else if (tipoFechado === 'mostrador' && fechaElaboracionInput.value) {
+        console.log('Días mostrador:', selectedProduct.diasVidaMostrador);
+        
         if (selectedProduct.diasVidaMostrador === null) {
           alert('Este producto usa la vida útil del empaque. Por favor ingresa la fecha manualmente.');
           fechaVencimientoMostradorInput.disabled = false;
@@ -836,6 +863,7 @@
         const dayVenc = String(fechaElab.getDate()).padStart(2, '0');
         
         fechaVencimientoMostradorInput.value = `${yearVenc}-${monthVenc}-${dayVenc}`;
+        console.log('Fecha mostrador calculada:', fechaVencimientoMostradorInput.value);
       }
     }
 
