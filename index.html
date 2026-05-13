@@ -149,14 +149,11 @@
       animation: fadeInUp 1s ease-out 0.7s backwards;
       position: relative;
       z-index: 1;
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
+      background: transparent;
       padding: 30px;
       border-radius: 20px;
       max-width: 400px;
       margin: 0 auto;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.1);
       transition: opacity 0.3s ease;
     }
 
@@ -625,7 +622,8 @@
   <div id="etiquetas"></div>
 
   <script>
-    const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRHsWD6WOIdawu2wH6bXvZpCcYsBpvflIK7zTJPiv_P4bSvlTj18LrmuoJcxUOVqt9UoMD6CGi0AgZS/pub?gid=0&single=true&output=csv';
+    // URL actualizada del Google Sheet con las 3 columnas
+    const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSMt8EYx-kpP0GhPH9jdVtDlhAcKIrEP5PrknCykTPXRH8rTKi5gN2n95sNFYU8BvG1kE2aKE-2XoFr/pub?gid=0&single=true&output=csv';
     
     const form = document.getElementById('formulario');
     const etiquetasDiv = document.getElementById('etiquetas');
@@ -699,12 +697,43 @@
         
         const lines = csvText.trim().split('\n');
         productosData = lines.slice(1).map(line => {
-          const [producto, dias] = line.split(',');
+          // Parsear CSV correctamente manejando comas dentro de valores
+          const values = [];
+          let current = '';
+          let inQuotes = false;
+          
+          for (let char of line) {
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+              values.push(current.trim());
+              current = '';
+            } else {
+              current += char;
+            }
+          }
+          values.push(current.trim());
+          
+          const [producto, diasEmpaque, diasMostrador] = values;
+          
+          // Parsear días de vida
+          let diasEmpaqueNum = parseInt(diasEmpaque);
+          let diasMostradorNum = parseInt(diasMostrador);
+          
+          // Si dice "Vida util del empaque", usar null
+          if (diasEmpaque && diasEmpaque.toLowerCase().includes('vida util')) {
+            diasEmpaqueNum = null;
+          }
+          if (diasMostrador && diasMostrador.toLowerCase().includes('vida util')) {
+            diasMostradorNum = null;
+          }
+          
           return {
-            nombre: producto.trim(),
-            diasVida: parseInt(dias.trim())
+            nombre: producto,
+            diasVidaEmpaque: diasEmpaqueNum,
+            diasVidaMostrador: diasMostradorNum
           };
-        }).filter(p => p.nombre && !isNaN(p.diasVida));
+        }).filter(p => p.nombre);
         
         loadingDiv.style.display = 'none';
         console.log('Productos cargados:', productosData);
@@ -712,11 +741,9 @@
         console.error('Error al cargar productos:', error);
         loadingDiv.textContent = '⚠️ Error al cargar productos.';
         productosData = [
-          { nombre: 'Açaí', diasVida: 3 },
-          { nombre: 'Pitaya', diasVida: 5 },
-          { nombre: 'Mango', diasVida: 7 },
-          { nombre: 'Fresa', diasVida: 4 },
-          { nombre: 'Plátano', diasVida: 2 }
+          { nombre: 'Sorbet Açai', diasVidaEmpaque: 6, diasVidaMostrador: 3 },
+          { nombre: 'Avena', diasVidaEmpaque: 30, diasVidaMostrador: 10 },
+          { nombre: 'Granola Avena y miel', diasVidaEmpaque: 30, diasVidaMostrador: 10 }
         ];
       }
     }
@@ -740,7 +767,16 @@
         filtrados.forEach(producto => {
           const item = document.createElement('div');
           item.className = 'autocomplete-item';
-          item.textContent = `${producto.nombre} (${producto.diasVida} días)`;
+          
+          // Mostrar días según el modo activo
+          let diasTexto = '';
+          if (tipoFechado === 'empaque') {
+            diasTexto = producto.diasVidaEmpaque !== null ? `${producto.diasVidaEmpaque} días` : 'Ver empaque';
+          } else {
+            diasTexto = producto.diasVidaMostrador !== null ? `${producto.diasVidaMostrador} días` : 'Ver empaque';
+          }
+          
+          item.textContent = `${producto.nombre} (${diasTexto})`;
           item.addEventListener('click', () => {
             productoInput.value = producto.nombre;
             selectedProduct = producto;
@@ -767,9 +803,16 @@
       if (!selectedProduct) return;
 
       if (tipoFechado === 'empaque' && fechaAbiertoInput.value) {
+        if (selectedProduct.diasVidaEmpaque === null) {
+          alert('Este producto usa la vida útil del empaque. Por favor ingresa la fecha manualmente.');
+          fechaVencimientoInput.disabled = false;
+          return;
+        }
+        
+        fechaVencimientoInput.disabled = true;
         const [year, month, day] = fechaAbiertoInput.value.split('-').map(Number);
         const fechaAbierto = new Date(year, month - 1, day);
-        fechaAbierto.setDate(fechaAbierto.getDate() + selectedProduct.diasVida);
+        fechaAbierto.setDate(fechaAbierto.getDate() + selectedProduct.diasVidaEmpaque);
         
         const yearVenc = fechaAbierto.getFullYear();
         const monthVenc = String(fechaAbierto.getMonth() + 1).padStart(2, '0');
@@ -777,9 +820,16 @@
         
         fechaVencimientoInput.value = `${yearVenc}-${monthVenc}-${dayVenc}`;
       } else if (tipoFechado === 'mostrador' && fechaElaboracionInput.value) {
+        if (selectedProduct.diasVidaMostrador === null) {
+          alert('Este producto usa la vida útil del empaque. Por favor ingresa la fecha manualmente.');
+          fechaVencimientoMostradorInput.disabled = false;
+          return;
+        }
+        
+        fechaVencimientoMostradorInput.disabled = true;
         const [year, month, day] = fechaElaboracionInput.value.split('-').map(Number);
         const fechaElab = new Date(year, month - 1, day);
-        fechaElab.setDate(fechaElab.getDate() + selectedProduct.diasVida);
+        fechaElab.setDate(fechaElab.getDate() + selectedProduct.diasVidaMostrador);
         
         const yearVenc = fechaElab.getFullYear();
         const monthVenc = String(fechaElab.getMonth() + 1).padStart(2, '0');
@@ -893,7 +943,9 @@
         document.getElementById('cantidad').value = '1';
         selectedProduct = null;
         fechaVencimientoInput.value = '';
+        fechaVencimientoInput.disabled = true;
         fechaVencimientoMostradorInput.value = '';
+        fechaVencimientoMostradorInput.disabled = true;
         form.style.opacity = '1';
       }, 200);
     });
