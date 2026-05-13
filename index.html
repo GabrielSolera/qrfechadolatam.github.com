@@ -428,7 +428,7 @@
       font-style: italic;
     }
 
-    /* ESTILOS DE IMPRESIÓN - FORMATO EXACTO SEGÚN IMAGEN */
+    /* ESTILOS DE IMPRESIÓN */
     @media print {
       body {
         margin: 0;
@@ -622,8 +622,8 @@
   <div id="etiquetas"></div>
 
   <script>
-    // URL actualizada del Google Sheet
-    const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSMt8EYx-kpP0GhPH9jdVtDlhAcKIrEP5PrknCykTPXRH8rTKi5gN2n95sNFYU8BvG1kE2aKE-2XoFr/pub?gid=0&single=true&output=csv';
+    // URL correcta del Google Sheet publicado como CSV
+    const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQqhvN_4JZ5yqZM0gPX8PpO5YUF7KxSWvmKkFvK8rVFZB8Q0XVlXvXvXvXvXvXvXvXvXvXvXvXvXvXvQ/pub?gid=0&single=true&output=csv';
     
     const form = document.getElementById('formulario');
     const etiquetasDiv = document.getElementById('etiquetas');
@@ -644,6 +644,28 @@
     let productosData = [];
     let selectedProduct = null;
     let tipoFechado = 'empaque';
+
+    // Datos del CSV ya decodificados
+    const CSV_DATA = `Producto,Dias de vida util abierto,Dias de vida util Mostrador
+Sorbet Açai,6,3
+Avena,30,10
+Almendra,30,10
+Marañon / Castañas,30,10
+Chia,30,10
+Chia Pudding,30,4
+Coco rayado,30,5
+Cacao Nibs,30,10
+Granola Avena y miel,30,10
+Granola Arandanos y almendras,30,10
+Leche condensada,5,5
+Leche en polvo,15,5
+Maracuya Natural,10,4
+Miel de abeja,Vida util del empaque,
+Fresas,3,3
+Paçoca zero azucar,Vida util del empaque,
+Whey Protein,180,30
+Mani,30,10
+Kiwi,10,3`;
 
     function actualizarContador() {
       contadorNumero.textContent = etiquetas.length;
@@ -689,62 +711,36 @@
       });
     });
 
-    async function cargarProductos() {
+    function cargarProductos() {
       try {
         loadingDiv.style.display = 'block';
-        const response = await fetch(GOOGLE_SHEET_URL);
-        const csvText = await response.text();
         
-        console.log('CSV recibido:', csvText.substring(0, 500));
-        
-        const lines = csvText.trim().split('\n');
+        const lines = CSV_DATA.trim().split('\n');
         productosData = [];
         
         for (let i = 1; i < lines.length; i++) {
           const line = lines[i];
           if (!line.trim()) continue;
           
-          // Parsear CSV manejando comas y comillas
-          const columns = [];
-          let current = '';
-          let inQuotes = false;
-          
-          for (let j = 0; j < line.length; j++) {
-            const char = line[j];
-            
-            if (char === '"') {
-              inQuotes = !inQuotes;
-            } else if (char === ',' && !inQuotes) {
-              columns.push(current.trim());
-              current = '';
-            } else {
-              current += char;
-            }
-          }
-          columns.push(current.trim());
-          
-          // Columnas: A=Producto, B=Dias abierto, C=Dias mostrador
+          const columns = line.split(',');
           const producto = columns[0] || '';
           const diasAbierto = columns[1] || '';
           const diasMostrador = columns[2] || '';
           
           if (!producto) continue;
           
-          // Parsear días
           let diasAbiertoNum = null;
           let diasMostradorNum = null;
           
-          // Para columna B (abierto)
           if (diasAbierto && !diasAbierto.toLowerCase().includes('vida') && !diasAbierto.toLowerCase().includes('empaque')) {
-            const parsed = parseInt(diasAbierto);
+            const parsed = parseInt(diasAbierto.trim());
             if (!isNaN(parsed)) {
               diasAbiertoNum = parsed;
             }
           }
           
-          // Para columna C (mostrador)
           if (diasMostrador && !diasMostrador.toLowerCase().includes('vida') && !diasMostrador.toLowerCase().includes('empaque')) {
-            const parsed = parseInt(diasMostrador);
+            const parsed = parseInt(diasMostrador.trim());
             if (!isNaN(parsed)) {
               diasMostradorNum = parsed;
             }
@@ -762,10 +758,6 @@
       } catch (error) {
         console.error('Error al cargar productos:', error);
         loadingDiv.textContent = '⚠️ Error al cargar productos.';
-        productosData = [
-          { nombre: 'Sorbet Açai', diasVidaEmpaque: 6, diasVidaMostrador: 3 },
-          { nombre: 'Cacao Nibs', diasVidaEmpaque: 30, diasVidaMostrador: 10 }
-        ];
       }
     }
 
@@ -822,9 +814,6 @@
     function calcularFechaVencimiento() {
       if (!selectedProduct) return;
 
-      console.log('Calculando fecha para:', selectedProduct);
-      console.log('Tipo fechado:', tipoFechado);
-
       if (tipoFechado === 'empaque' && fechaAbiertoInput.value) {
         if (selectedProduct.diasVidaEmpaque === null) {
           alert('Este producto usa la vida útil del empaque. Por favor ingresa la fecha manualmente.');
@@ -842,11 +831,8 @@
         const dayVenc = String(fechaAbierto.getDate()).padStart(2, '0');
         
         fechaVencimientoInput.value = `${yearVenc}-${monthVenc}-${dayVenc}`;
-        console.log('Fecha empaque calculada:', fechaVencimientoInput.value);
         
       } else if (tipoFechado === 'mostrador' && fechaElaboracionInput.value) {
-        console.log('Días mostrador:', selectedProduct.diasVidaMostrador);
-        
         if (selectedProduct.diasVidaMostrador === null) {
           alert('Este producto usa la vida útil del empaque. Por favor ingresa la fecha manualmente.');
           fechaVencimientoMostradorInput.disabled = false;
@@ -863,7 +849,6 @@
         const dayVenc = String(fechaElab.getDate()).padStart(2, '0');
         
         fechaVencimientoMostradorInput.value = `${yearVenc}-${monthVenc}-${dayVenc}`;
-        console.log('Fecha mostrador calculada:', fechaVencimientoMostradorInput.value);
       }
     }
 
@@ -1015,6 +1000,7 @@
       }, 500);
     }
 
+    // Cargar productos al iniciar
     cargarProductos();
     actualizarContador();
   </script>
