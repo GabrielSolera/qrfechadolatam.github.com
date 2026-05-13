@@ -431,7 +431,7 @@
       font-style: italic;
     }
 
-    /* ESTILOS DE IMPRESIÓN - 2 COLUMNAS x 10 FILAS = 20 ETIQUETAS */
+    /* ESTILOS DE IMPRESIÓN - FORMATO EXACTO SEGÚN IMAGEN */
     @media print {
       body {
         margin: 0;
@@ -445,14 +445,14 @@
 
       @page {
         size: letter portrait;
-        margin: 0.5cm 0.8cm;
+        margin: 0.5cm 0.7cm;
       }
 
       #etiquetas {
         display: grid;
         grid-template-columns: repeat(2, 10.16cm);
         grid-auto-rows: 2.54cm;
-        column-gap: 0.2cm;
+        column-gap: 0.15cm;
         row-gap: 0;
         justify-content: center;
         align-content: start;
@@ -463,16 +463,16 @@
       .etiqueta {
         width: 10.16cm;
         height: 2.54cm;
-        font-size: 7.5px;
-        padding: 3px 6px;
+        font-size: 8px;
+        padding: 2px 5px;
         padding-top: 10px;
-        padding-bottom: 3px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
+        padding-bottom: 2px;
+        border: 0.5px solid #ddd;
+        border-radius: 2px;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        line-height: 1.15;
+        line-height: 1.2;
         background: white !important;
         box-shadow: none;
         margin: 0;
@@ -489,19 +489,19 @@
       .etiqueta span {
         display: flex;
         justify-content: space-between;
-        padding: 0.5px 0;
-        font-size: 7.5px;
+        padding: 0.8px 0;
+        font-size: 8px;
       }
 
       .etiqueta span b {
-        font-size: 7px;
-        min-width: 48%;
+        font-size: 7.5px;
+        min-width: 50%;
         font-weight: 700;
       }
 
       .etiqueta span span {
         text-align: right;
-        font-size: 7.5px;
+        font-size: 8px;
         font-weight: 600;
       }
 
@@ -509,7 +509,7 @@
         position: absolute;
         top: 2px;
         left: 4px;
-        font-size: 5.5px;
+        font-size: 6px;
         padding: 1px 4px;
         border-radius: 2px;
       }
@@ -518,7 +518,7 @@
         position: absolute;
         bottom: 1px;
         right: 3px;
-        font-size: 5.5px;
+        font-size: 6px;
         color: rgba(0, 0, 0, 0.5);
       }
     }
