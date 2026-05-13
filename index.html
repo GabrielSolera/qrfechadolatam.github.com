@@ -106,6 +106,42 @@
       letter-spacing: 0.5px;
     }
 
+    .tipo-fechado-container {
+      margin: 20px 0;
+      animation: fadeIn 1s ease-out 0.6s backwards;
+      position: relative;
+      z-index: 1;
+    }
+
+    .toggle-wrapper {
+      display: inline-flex;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 5px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .toggle-option {
+      padding: 10px 25px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      background: transparent;
+      border: none;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .toggle-option.active {
+      background: linear-gradient(135deg, #e63946 0%, #ff4757 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(230, 57, 70, 0.4);
+    }
+
     form {
       display: flex;
       flex-direction: column;
@@ -213,6 +249,16 @@
       border-bottom: none;
     }
 
+    .campo-empaque, .campo-mostrador {
+      width: 100%;
+      display: none;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .campo-empaque.visible, .campo-mostrador.visible {
+      display: contents;
+    }
+
     button {
       margin: 10px;
       padding: 12px 28px;
@@ -258,6 +304,23 @@
       transform: translateY(-1px);
     }
 
+    .contador-etiquetas {
+      margin: 20px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      animation: fadeIn 1s ease-out;
+      position: relative;
+      z-index: 1;
+    }
+
+    .contador-etiquetas .numero {
+      font-size: 24px;
+      color: #e63946;
+      text-shadow: 0 0 10px rgba(230, 57, 70, 0.5);
+    }
+
     #etiquetas {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -288,6 +351,11 @@
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       animation: slideIn 0.5s ease-out backwards;
       transform-origin: center;
+    }
+
+    .etiqueta.mostrador {
+      border-color: #ff6b35;
+      background: linear-gradient(135deg, #fff9f5 0%, #ffe8dc 100%);
     }
 
     @keyframes slideIn {
@@ -324,6 +392,28 @@
       color: #2f006e;
     }
 
+    .etiqueta.mostrador span b {
+      color: #ff6b35;
+    }
+
+    .tipo-badge {
+      position: absolute;
+      top: 3px;
+      left: 6px;
+      font-size: 7px;
+      background: #e63946;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .etiqueta.mostrador .tipo-badge {
+      background: #ff6b35;
+    }
+
     .timestamp {
       position: absolute;
       bottom: 3px;
@@ -341,32 +431,95 @@
       font-style: italic;
     }
 
+    /* ESTILOS DE IMPRESIÓN - 2 COLUMNAS x 10 FILAS = 20 ETIQUETAS */
     @media print {
       body {
         margin: 0;
         padding: 0;
+        background: white;
+      }
+
+      .logo, .banderas, h1, .tipo-fechado-container, form, .contador-etiquetas {
+        display: none !important;
+      }
+
+      @page {
+        size: letter portrait;
+        margin: 0.5cm 0.8cm;
       }
 
       #etiquetas {
         display: grid;
-        grid-template-columns: repeat(6, 38mm);
-        gap: 0.3cm 0.3cm;
+        grid-template-columns: repeat(2, 10.16cm);
+        grid-auto-rows: 2.54cm;
+        column-gap: 0.2cm;
+        row-gap: 0;
         justify-content: center;
-        padding: 0.3cm;
+        align-content: start;
+        padding: 0;
+        margin: 0;
       }
 
       .etiqueta {
-        width: 38mm;
-        height: 30mm;
-        font-size: 10px;
-        padding: 4px;
-        padding-bottom: 18px;
-        border-radius: 6px;
-        line-height: 1.2;
+        width: 10.16cm;
+        height: 2.54cm;
+        font-size: 7.5px;
+        padding: 3px 6px;
+        padding-top: 10px;
+        padding-bottom: 3px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        line-height: 1.15;
+        background: white !important;
+        box-shadow: none;
+        margin: 0;
+        page-break-inside: avoid;
+        animation: none !important;
+        transform: none !important;
+      }
+
+      .etiqueta.mostrador {
+        border-color: #ff6b35;
+        background: #fffaf7 !important;
+      }
+
+      .etiqueta span {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5px 0;
+        font-size: 7.5px;
+      }
+
+      .etiqueta span b {
+        font-size: 7px;
+        min-width: 48%;
+        font-weight: 700;
+      }
+
+      .etiqueta span span {
+        text-align: right;
+        font-size: 7.5px;
+        font-weight: 600;
+      }
+
+      .tipo-badge {
+        position: absolute;
+        top: 2px;
+        left: 4px;
+        font-size: 5.5px;
+        padding: 1px 4px;
+        border-radius: 2px;
       }
 
       .timestamp {
-        font-size: 8px;
+        position: absolute;
+        bottom: 1px;
+        right: 3px;
+        font-size: 5.5px;
+        color: rgba(0, 0, 0, 0.5);
       }
     }
 
@@ -382,6 +535,14 @@
       margin: 0;
       position: relative;
       z-index: 1;
+    }
+
+    #botones button:nth-child(2) {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+
+    #botones button:nth-child(2):hover {
+      box-shadow: 0 6px 20px rgba(40, 167, 69, 0.5);
     }
 
     #botones button:nth-child(3) {
@@ -407,6 +568,17 @@
 
   <h1>Fechado productos OAK Latam</h1>
 
+  <div class="tipo-fechado-container">
+    <div class="toggle-wrapper">
+      <button type="button" class="toggle-option active" data-tipo="empaque">Empaque</button>
+      <button type="button" class="toggle-option" data-tipo="mostrador">Mostrador</button>
+    </div>
+  </div>
+
+  <div class="contador-etiquetas" id="contador">
+    Etiquetas creadas: <span class="numero" id="contadorNumero">0</span> / 20
+  </div>
+
   <form id="formulario">
     <label for="producto">Producto:</label>
     <div class="input-container">
@@ -415,23 +587,33 @@
     </div>
     <div id="loading" class="loading" style="display: none;">Cargando productos...</div>
 
-    <label for="lote">Lote:</label>
-    <input type="text" id="lote" placeholder="Ej: L234-08" required>
+    <div class="campo-empaque visible">
+      <label for="lote">Lote:</label>
+      <input type="text" id="lote" placeholder="Ej: L234-08">
 
-    <label for="fechaPrimaria">Fecha vencimiento empaque:</label>
-    <input type="date" id="fechaPrimaria" required>
+      <label for="fechaPrimaria">Fecha vencimiento empaque:</label>
+      <input type="date" id="fechaPrimaria">
 
-    <label for="fechaAbierto">Fecha abierto / Descongelado:</label>
-    <input type="date" id="fechaAbierto" required>
+      <label for="fechaAbierto">Fecha abierto / Descongelado:</label>
+      <input type="date" id="fechaAbierto">
 
-    <label for="fechaVencimientoAbierto">Fecha vencimiento abierto:</label>
-    <input type="date" id="fechaVencimientoAbierto" disabled required>
+      <label for="fechaVencimientoAbierto">Fecha vencimiento abierto:</label>
+      <input type="date" id="fechaVencimientoAbierto" disabled>
+    </div>
+
+    <div class="campo-mostrador">
+      <label for="fechaElaboracion">Fecha de elaboración:</label>
+      <input type="date" id="fechaElaboracion">
+
+      <label for="fechaVencimientoMostrador">Fecha de vencimiento:</label>
+      <input type="date" id="fechaVencimientoMostrador" disabled>
+    </div>
 
     <label for="responsable">Responsable:</label>
     <input type="text" id="responsable" placeholder="Ej: Juan Pérez" required>
 
     <label for="cantidad">Cantidad de etiquetas:</label>
-    <input type="number" id="cantidad" min="1" max="36" value="1" placeholder="¿Cuántas?" required>
+    <input type="number" id="cantidad" min="1" max="20" value="1" placeholder="¿Cuántas?" required>
 
     <div id="botones">
       <button type="submit">Siguiente</button>
@@ -443,29 +625,78 @@
   <div id="etiquetas"></div>
 
   <script>
-    // URL de Google Sheets con los productos y días de vida útil
     const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRHsWD6WOIdawu2wH6bXvZpCcYsBpvflIK7zTJPiv_P4bSvlTj18LrmuoJcxUOVqt9UoMD6CGi0AgZS/pub?gid=0&single=true&output=csv';
     
     const form = document.getElementById('formulario');
     const etiquetasDiv = document.getElementById('etiquetas');
     const productoInput = document.getElementById('producto');
     const autocompleteList = document.getElementById('autocomplete-list');
+    const loadingDiv = document.getElementById('loading');
+    const contadorNumero = document.getElementById('contadorNumero');
+    
+    const camposEmpaque = document.querySelector('.campo-empaque');
+    const camposMostrador = document.querySelector('.campo-mostrador');
+    
     const fechaAbiertoInput = document.getElementById('fechaAbierto');
     const fechaVencimientoInput = document.getElementById('fechaVencimientoAbierto');
-    const loadingDiv = document.getElementById('loading');
+    const fechaElaboracionInput = document.getElementById('fechaElaboracion');
+    const fechaVencimientoMostradorInput = document.getElementById('fechaVencimientoMostrador');
     
     let etiquetas = [];
     let productosData = [];
     let selectedProduct = null;
+    let tipoFechado = 'empaque';
 
-    // Cargar productos desde Google Sheets
+    function actualizarContador() {
+      contadorNumero.textContent = etiquetas.length;
+      
+      if (etiquetas.length >= 18) {
+        contadorNumero.style.color = '#ff4757';
+      } else if (etiquetas.length >= 15) {
+        contadorNumero.style.color = '#ffa502';
+      } else {
+        contadorNumero.style.color = '#e63946';
+      }
+    }
+
+    document.querySelectorAll('.toggle-option').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.toggle-option').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        tipoFechado = this.dataset.tipo;
+        
+        if (tipoFechado === 'empaque') {
+          camposEmpaque.classList.add('visible');
+          camposMostrador.classList.remove('visible');
+          document.getElementById('lote').required = true;
+          document.getElementById('fechaPrimaria').required = true;
+          document.getElementById('fechaAbierto').required = true;
+          document.getElementById('fechaVencimientoAbierto').required = true;
+          document.getElementById('fechaElaboracion').required = false;
+          document.getElementById('fechaVencimientoMostrador').required = false;
+        } else {
+          camposEmpaque.classList.remove('visible');
+          camposMostrador.classList.add('visible');
+          document.getElementById('fechaElaboracion').required = true;
+          document.getElementById('fechaVencimientoMostrador').required = true;
+          document.getElementById('lote').required = false;
+          document.getElementById('fechaPrimaria').required = false;
+          document.getElementById('fechaAbierto').required = false;
+          document.getElementById('fechaVencimientoAbierto').required = false;
+        }
+        
+        form.reset();
+        document.getElementById('cantidad').value = '1';
+        selectedProduct = null;
+      });
+    });
+
     async function cargarProductos() {
       try {
         loadingDiv.style.display = 'block';
         const response = await fetch(GOOGLE_SHEET_URL);
         const csvText = await response.text();
         
-        // Parsear CSV
         const lines = csvText.trim().split('\n');
         productosData = lines.slice(1).map(line => {
           const [producto, dias] = line.split(',');
@@ -479,8 +710,7 @@
         console.log('Productos cargados:', productosData);
       } catch (error) {
         console.error('Error al cargar productos:', error);
-        loadingDiv.textContent = '⚠️ Error al cargar productos. Verifica la URL.';
-        // Datos de ejemplo si falla la carga
+        loadingDiv.textContent = '⚠️ Error al cargar productos.';
         productosData = [
           { nombre: 'Açaí', diasVida: 3 },
           { nombre: 'Pitaya', diasVida: 5 },
@@ -491,7 +721,6 @@
       }
     }
 
-    // Autocompletado
     productoInput.addEventListener('input', function() {
       const valor = this.value.toLowerCase();
       autocompleteList.innerHTML = '';
@@ -525,31 +754,39 @@
       }
     });
 
-    // Cerrar autocomplete al hacer clic fuera
     document.addEventListener('click', function(e) {
       if (!e.target.closest('.input-container')) {
         autocompleteList.classList.remove('active');
       }
     });
 
-    // Calcular fecha de vencimiento automáticamente
     fechaAbiertoInput.addEventListener('change', calcularFechaVencimiento);
+    fechaElaboracionInput.addEventListener('change', calcularFechaVencimiento);
 
     function calcularFechaVencimiento() {
-      if (!selectedProduct || !fechaAbiertoInput.value) return;
+      if (!selectedProduct) return;
 
-      // Parsear la fecha correctamente para evitar problemas de zona horaria
-      const [year, month, day] = fechaAbiertoInput.value.split('-').map(Number);
-      const fechaAbierto = new Date(year, month - 1, day);
-      
-      // Sumar los días de vida útil
-      fechaAbierto.setDate(fechaAbierto.getDate() + selectedProduct.diasVida);
-      
-      const yearVenc = fechaAbierto.getFullYear();
-      const monthVenc = String(fechaAbierto.getMonth() + 1).padStart(2, '0');
-      const dayVenc = String(fechaAbierto.getDate()).padStart(2, '0');
-      
-      fechaVencimientoInput.value = `${yearVenc}-${monthVenc}-${dayVenc}`;
+      if (tipoFechado === 'empaque' && fechaAbiertoInput.value) {
+        const [year, month, day] = fechaAbiertoInput.value.split('-').map(Number);
+        const fechaAbierto = new Date(year, month - 1, day);
+        fechaAbierto.setDate(fechaAbierto.getDate() + selectedProduct.diasVida);
+        
+        const yearVenc = fechaAbierto.getFullYear();
+        const monthVenc = String(fechaAbierto.getMonth() + 1).padStart(2, '0');
+        const dayVenc = String(fechaAbierto.getDate()).padStart(2, '0');
+        
+        fechaVencimientoInput.value = `${yearVenc}-${monthVenc}-${dayVenc}`;
+      } else if (tipoFechado === 'mostrador' && fechaElaboracionInput.value) {
+        const [year, month, day] = fechaElaboracionInput.value.split('-').map(Number);
+        const fechaElab = new Date(year, month - 1, day);
+        fechaElab.setDate(fechaElab.getDate() + selectedProduct.diasVida);
+        
+        const yearVenc = fechaElab.getFullYear();
+        const monthVenc = String(fechaElab.getMonth() + 1).padStart(2, '0');
+        const dayVenc = String(fechaElab.getDate()).padStart(2, '0');
+        
+        fechaVencimientoMostradorInput.value = `${yearVenc}-${monthVenc}-${dayVenc}`;
+      }
     }
 
     form.addEventListener('submit', function (e) {
@@ -561,51 +798,78 @@
       }
 
       const cantidadSolicitada = parseInt(document.getElementById('cantidad').value);
-      const espacioDisponible = 36 - etiquetas.length;
+      const espacioDisponible = 20 - etiquetas.length;
       
       if (cantidadSolicitada > espacioDisponible) {
-        return alert(`Solo puedes agregar ${espacioDisponible} etiquetas más. Actualmente tienes ${etiquetas.length}/36.`);
+        return alert(`Solo puedes agregar ${espacioDisponible} etiquetas más. Actualmente tienes ${etiquetas.length}/20.`);
       }
 
       const producto = productoInput.value.trim();
-      const lote = document.getElementById('lote').value.trim();
-      const fechaPrimariaVal = document.getElementById('fechaPrimaria').value;
-      const fechaAbiertoVal = fechaAbiertoInput.value;
-      const fechaVencimientoVal = fechaVencimientoInput.value;
       const responsable = document.getElementById('responsable').value.trim();
 
-      // Validación usando Date solo para lógica
-      const fechaPrimariaDate = new Date(fechaPrimariaVal);
-      const fechaAbiertoDate = new Date(fechaAbiertoVal);
-      const fechaVencimientoDate = new Date(fechaVencimientoVal);
+      let etiquetaHTML = '';
 
-      if (fechaVencimientoDate < fechaAbiertoDate) {
-        alert("La fecha de vencimiento no puede ser anterior a la fecha de apertura.");
-        return;
-      }
-      if (fechaVencimientoDate > fechaPrimariaDate) {
-        alert("La fecha de vencimiento no puede ser posterior a la fecha primaria.");
-        return;
-      }
+      if (tipoFechado === 'empaque') {
+        const lote = document.getElementById('lote').value.trim();
+        const fechaPrimariaVal = document.getElementById('fechaPrimaria').value;
+        const fechaAbiertoVal = fechaAbiertoInput.value;
+        const fechaVencimientoVal = fechaVencimientoInput.value;
 
-      // Mostrar fechas sin desfase
-      const fechaPrimariaStr = formatearFecha(fechaPrimariaVal);
-      const fechaAbiertoStr = formatearFecha(fechaAbiertoVal);
-      const fechaVencimientoStr = formatearFecha(fechaVencimientoVal);
+        const fechaPrimariaDate = new Date(fechaPrimariaVal);
+        const fechaAbiertoDate = new Date(fechaAbiertoVal);
+        const fechaVencimientoDate = new Date(fechaVencimientoVal);
 
-      // Crear múltiples etiquetas
-      for (let i = 0; i < cantidadSolicitada; i++) {
-        const etiqueta = document.createElement('div');
-        etiqueta.className = 'etiqueta';
-        etiqueta.style.animationDelay = `${i * 0.1}s`;
-        etiqueta.innerHTML = `
+        if (fechaVencimientoDate < fechaAbiertoDate) {
+          alert("La fecha de vencimiento no puede ser anterior a la fecha de apertura.");
+          return;
+        }
+        if (fechaVencimientoDate > fechaPrimariaDate) {
+          alert("La fecha de vencimiento no puede ser posterior a la fecha primaria.");
+          return;
+        }
+
+        const fechaPrimariaStr = formatearFecha(fechaPrimariaVal);
+        const fechaAbiertoStr = formatearFecha(fechaAbiertoVal);
+        const fechaVencimientoStr = formatearFecha(fechaVencimientoVal);
+
+        etiquetaHTML = `
+          <div class="tipo-badge">EMP</div>
           <span><b>Producto:</b> <span>${producto}</span></span>
           <span><b>Lote:</b> <span>${lote}</span></span>
-          <span><b>Fecha primaria:</b> <span>${fechaPrimariaStr}</span></span>
-          <span><b>Fecha abierto:</b> <span>${fechaAbiertoStr}</span></span>
-          <span><b>Vence abierto:</b> <span>${fechaVencimientoStr}</span></span>
+          <span><b>F. primaria:</b> <span>${fechaPrimariaStr}</span></span>
+          <span><b>F. abierto:</b> <span>${fechaAbiertoStr}</span></span>
+          <span><b>Vence:</b> <span>${fechaVencimientoStr}</span></span>
+          <span><b>Resp.:</b> <span>${responsable}</span></span>
+        `;
+      } else {
+        const fechaElaboracionVal = fechaElaboracionInput.value;
+        const fechaVencimientoVal = fechaVencimientoMostradorInput.value;
+
+        const fechaElabDate = new Date(fechaElaboracionVal);
+        const fechaVencDate = new Date(fechaVencimientoVal);
+
+        if (fechaVencDate < fechaElabDate) {
+          alert("La fecha de vencimiento no puede ser anterior a la fecha de elaboración.");
+          return;
+        }
+
+        const fechaElaboracionStr = formatearFecha(fechaElaboracionVal);
+        const fechaVencimientoStr = formatearFecha(fechaVencimientoVal);
+
+        etiquetaHTML = `
+          <div class="tipo-badge">MOST</div>
+          <span><b>Producto:</b> <span>${producto}</span></span>
+          <span><b>F. elaboración:</b> <span>${fechaElaboracionStr}</span></span>
+          <span><b>F. vencimiento:</b> <span>${fechaVencimientoStr}</span></span>
           <span><b>Responsable:</b> <span>${responsable}</span></span>
         `;
+      }
+
+      for (let i = 0; i < cantidadSolicitada; i++) {
+        const etiqueta = document.createElement('div');
+        etiqueta.className = tipoFechado === 'mostrador' ? 'etiqueta mostrador' : 'etiqueta';
+        etiqueta.style.animationDelay = `${i * 0.1}s`;
+        etiqueta.innerHTML = etiquetaHTML;
 
         const timestamp = document.createElement('div');
         timestamp.className = 'timestamp';
@@ -621,13 +885,15 @@
         }, 500 + (i * 100));
       }
       
-      // Limpiar formulario con animación
+      actualizarContador();
+      
       form.style.opacity = '0.7';
       setTimeout(() => {
         form.reset();
         document.getElementById('cantidad').value = '1';
         selectedProduct = null;
         fechaVencimientoInput.value = '';
+        fechaVencimientoMostradorInput.value = '';
         form.style.opacity = '1';
       }, 200);
     });
@@ -645,12 +911,12 @@
     }
 
     function imprimir() {
-      const printWindow = window.open('', '_blank');
-      printWindow.document.write('<html><head><title>Imprimir etiquetas</title><style>@page { margin: 0; } body { margin: 0; display: grid; grid-template-columns: repeat(6, 38mm); gap: 0.3cm 0.3cm; justify-content: center; padding: 0.3cm; font-family: Poppins, sans-serif; } .etiqueta { border: 1px solid black; width: 38mm; height: 30mm; box-sizing: border-box; font-size: 10px; padding: 4px; padding-bottom: 18px; position: relative; border-radius: 6px; display: flex; flex-direction: column; justify-content: flex-start; line-height: 1.2; } .etiqueta span { display: flex; justify-content: space-between; } .timestamp { position: absolute; bottom: 2px; right: 4px; font-size: 8px; color: rgba(0, 0, 0, 0.4); pointer-events: none; }</style></head><body>');
-      etiquetas.forEach(et => printWindow.document.body.appendChild(et.cloneNode(true)));
-      printWindow.document.write('</body></html>');
-      printWindow.document.close();
-      printWindow.print();
+      if (etiquetas.length === 0) {
+        alert('No hay etiquetas para imprimir.');
+        return;
+      }
+      
+      window.print();
     }
 
     function limpiarHoja() {
@@ -665,11 +931,12 @@
       setTimeout(() => {
         etiquetas = [];
         etiquetasDiv.innerHTML = '';
+        actualizarContador();
       }, 500);
     }
 
-    // Cargar productos al iniciar
     cargarProductos();
+    actualizarContador();
   </script>
 </body>
 </html>
